@@ -38,5 +38,27 @@ class KNearestNeighbors:
             predictions.append(prediction)
 
         return np.array(predictions)
+        
+
+     def threshold_knn_shapley(self, x_test: np.ndarray, threshold: float = 1.0, epsilon: float = 1e-8) -> np.ndarray:
+    from sklearn.metrics import pairwise_distances
+
+    n_test = x_test.shape[0]
+    n_train = self.x_train.shape[0]
+    shap_values = np.zeros((n_test, n_train))
+
+    model_output_test = self.model.predict(x_test)
+    distances = pairwise_distances(x_test, self.x_train)
+
+    threshold_mask = distances < threshold
+    label_match_mask = (self.y_train[None, :] == model_output_test[:, None])
+    contribution = threshold_mask & label_match_mask
+    contribution = contribution.astype(float)
+
+    normalization = np.sum(threshold_mask, axis=1, keepdims=True) + epsilon
+    shap_values = contribution / normalization
+    return shap_values
+
+ 
 
 
