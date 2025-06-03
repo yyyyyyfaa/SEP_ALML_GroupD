@@ -1,6 +1,6 @@
 # TODO(mmschlk): add your project name and description here
 # uncomment the following line and incpororate the build system
-# [build-system]
+#[build-system]
 
 [project]
 name = "shapiq-student"
