@@ -33,6 +33,34 @@ class KNNExplainer(Explainer):
         pass
 
 
-    def weighted_knn_shapley(self, x_query, gamma):
+    def weighted_knn_shapley(self, x_query, gamma, K):
         # TODO Implement weighted
+            # if K = null ??
+        x_val, y_val = x_query
+        X = self.dataset
+        Y = self.labels
+        N = len(X) #Menge der Daten im Datensatz
+
+        #Berechnung der distanz
+        distance = np.linalg.norm(X - x_val, axis = 1)
+
+        #Sortieren nach Distanz
+        sorted_index = np.argsort(distance)
+        sorted_distance = distance[sorted_index]
+        X_sorted = X[sorted_index]
+        Y_sorted = Y[sorted_index]
+        D = list(zip(X_sorted, Y_sorted))
+
+        # TODO Berechnung der Gewichtung
+
+        # TODO Initialisierung von F
+
+        # TODO Berechnung von F
+
+        # TODO Berechnung von R
+
+        # TODO Berechnung von G
+
+        # TODO Berechnung des Shapleys von z
+
         pass
