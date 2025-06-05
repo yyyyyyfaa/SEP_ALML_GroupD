@@ -3,24 +3,25 @@ from shapiq import Explainer, InteractionValues
 
 
 class KNNExplainer(Explainer):
-    def __init__(self, model, dataset: np.ndarray, method: str = 'standard_shapley'):
+    def __init__(self, model, dataset: np.ndarray, labels: np.ndarray, method: str = 'standard_shapley'): #labels hinzugefügt für WKNN
         super(KNNExplainer, self).__init__(model, dataset)
         self.dataset = dataset
         self.method = method
+        self.labels = labels #labels hinzugefügt für WKNN
 
     def explain_function(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         if self.method == 'standard_shapley':
-            intercation_values = self.knn_shapley(x)
+            interaction_values = self.knn_shapley(x)
         elif self.method == 'threshold':
             threshold = kwargs['threshold']
-            intercation_values = self.threshold_knn_shapley(x, threshold)
+            interaction_values = self.threshold_knn_shapley(x, threshold)
         elif self.method == 'weighted':
             gamma = kwargs['gamma']
             interaction_values = self.weighted_knn_shapley(x,gamma)
         else:
             print('Method must be one of "standard_shapley", "threshold", "weighted"')
 
-        return intercation_values
+        return interaction_values
 
 
     def knn_shapley(self, x_query):
@@ -45,22 +46,33 @@ class KNNExplainer(Explainer):
         distance = np.linalg.norm(X - x_val, axis = 1)
 
         #Sortieren nach Distanz
-        sorted_index = np.argsort(distance)
-        sorted_distance = distance[sorted_index]
-        X_sorted = X[sorted_index]
-        Y_sorted = Y[sorted_index]
-        D = list(zip(X_sorted, Y_sorted))
+        sorted_index = np.argsort(distance) #Indizes für Sortierung
+        sorted_distance = distance[sorted_index] #sortierung nach Distanz
+        X_sorted = X[sorted_index] #sortierung nach X
+        Y_sorted = Y[sorted_index] #sortierung nach labels
+        D = list(zip(X_sorted, Y_sorted)) #sortierter wieder zusammengefügter Datensatz
 
-        # TODO Berechnung der Gewichtung
+        # Berechnung der Gewichtung
+        w_i = np.exp(-sorted_distance / gamma) #RBF Kernel weight
+        w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i
 
-        # TODO Initialisierung von F
 
-        # TODO Berechnung von F
+        for i in range (1, N):
 
-        # TODO Berechnung von R
+            # TODO Initialisierung von F
+            W_K = w_i * K
+            for m in range(1, N):
+                for l in range(1, K - 1):
+                    for s in W_K:
+                        F[(m, l, s)] = 0
+            
 
-        # TODO Berechnung von G
+            # TODO Berechnung von F
 
-        # TODO Berechnung des Shapleys von z
+            # TODO Berechnung von R
 
-        pass
+            # TODO Berechnung von G
+
+            # TODO Berechnung des Shapleys von z
+            pass
+    pass
