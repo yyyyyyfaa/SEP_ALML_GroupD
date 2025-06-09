@@ -51,7 +51,7 @@ class KNNExplainer(Explainer):
         if c == 0:
             return np.zeros(N)
 
-        # Alle Shapley werte null setzen
+        # Initialisierung aller Shapley werte mit 0
         phi = np.zeros(N)
 
         y_neighbors = self.dataset[neighbor_indices] # Wieviele Nachbarn das gleich label wie y_validierung haben
