@@ -1,12 +1,14 @@
 import numpy as np
+from networkx import neighbors
 from shapiq import Explainer, InteractionValues
 
 
 class KNNExplainer(Explainer):
-    def __init__(self, model, dataset: np.ndarray, method: str = 'standard_shapley'):
+    def __init__(self, model, dataset: np.ndarray, labels, method: str):
         super(KNNExplainer, self).__init__(model, dataset)
         self.dataset = dataset
         self.method = method
+        self.labels = labels
 
     def explain_function(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         if self.method == 'standard_shapley':
@@ -28,9 +30,35 @@ class KNNExplainer(Explainer):
         pass
 
 
-    def threshold_knn_shapley(self, x_query, threshold):
-        # TODO Implement theshold
-        pass
+    def threshold_knn_shapley(self, x_query, threshold, num_classes):
+        # TODO Implement threshold
+        # Berechnet Treshold knn shapley werte fuer einen Validierungspunkt
+
+        x_val, y_val = x_query
+        X = self.dataset
+        Y = self.labels
+
+        N = self.dataset.shape[0] # Menge der Trainingspunkte
+
+        distance = np.linalg.norm(x_query - self.dataset, axis=1) # Distanz berechnen
+        print(distance) # Testen
+
+        neighbors_mask = distance <= threshold # if true
+        neighbor_indices = np.where(neighbors_mask)[0] # Indizes der Punkte innerhalb treshold / Labelvergleich
+
+        c = len(neighbor_indices) # Menge der Nachbarn innerhalb des treshold
+
+        if c == 0:
+            return np.zeros(N)
+
+        # Alle Shapley werte null setzen
+        phi = np.zeros(N)
+
+        y_neighbors = self.dataset[neighbor_indices] # Wieviele Nachbarn das gleich label wie y_validierung haben
+        c_plus = np.sum(y_neighbors == self.dataset)
+
+        return phi
+    pass
 
 
     def weighted_knn_shapley(self, x_query, gamma):
