@@ -51,7 +51,9 @@ class KNNExplainer(Explainer):
 
         N = self.dataset.shape[0] # Menge der Trainingspunkte
 
-        phi = np.zeros(N) # Alle Shapley werte null setzen
+        # Initialisierung aller Shapley werte mit 0
+        phi = np.zeros(N)
+
 
         for i in range(N):
             x_i, y_i = X[i], y[i]
