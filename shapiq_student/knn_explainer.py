@@ -1,11 +1,12 @@
 import numpy as np
 from shapiq import Explainer, InteractionValues
+from math import comp
 
 
 class KNNExplainer(Explainer):
     def __init__(
         self, model, dataset: np.ndarray, labels: np.ndarray, method: str = "standard_shapley"
-    ):  # labels hinzugefügt für WKNN
+        ):# labels hinzugefügt für WKNN
         super(KNNExplainer, self).__init__(model, dataset)
         self.dataset = dataset
         self.method = method
@@ -34,7 +35,7 @@ class KNNExplainer(Explainer):
         pass
 
     def weighted_knn_shapley(self, x_query, gamma, K):
-        # TODO Implement weighted
+        # Implement weighted
         # if K = null ??
         x_val, y_val = x_query
         X = self.dataset
@@ -58,14 +59,16 @@ class KNNExplainer(Explainer):
         w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i
 
         for i in range(1, N):
-            w_k = w_i * K
+            b = 3 #Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
+            w_k = np.linspace(0, K, 2^b * K)
+
             # Initialisierung von F als Dictionary
             F_i = {}
             # F als 0 setzen
             for m in range(1, N):
-                for l in range(1, K - 1):
+                for length in range(1, K - 1):
                     for s in w_k:
-                        F_i[(m, l, s)] = 0
+                        F_i[(m, length, s)] = 0
 
             for m in range(1, N):
                 if m == i:
@@ -73,15 +76,15 @@ class KNNExplainer(Explainer):
                 F_i = 1
 
             # Berechnung von F
-            for l in range(2, K-1):
-                for t in range(1, l):
-                    F_0 = sum(F_i[(t, l - 1, s)])
-                for m in range(l, N):
+            for length in range(2, K-1):
+                for t in range(1, length):
+                    F_0 = sum(F_i[(t, length - 1, s)])
+                for m in range(length, N):
                     if m == i:
                         continue
                     for s in w_k:
                         w_m = w_j[m]
-                        F_i[(m, l, s)] = F_0[(s - w_m)]
+                        F_i[(m, length, s)] = F_0[(s - w_m)]
 
             # Berechnung von R_0
             R_0 = {}
@@ -96,6 +99,42 @@ class KNNExplainer(Explainer):
                     R_im = sum(R_0[s] for s in range(- w_m, - w_i))
                 R_0 = R_0 + F_i[(m, K - 1, s)]
 
-            # TODO Berechnung von G
+            # Berechnung von G
+            G_i0 = {}
+            if w_i < 0:
+                G_i0 = -1
+            else:
+                for length in range(1, K - 1):
+                    G_il = {}
+                    if Y_sorted == y_val:
+                        for m in range(N):
+                            if m == i:
+                                continue
+                            G_il = sum(F_i [(m, length, s)]) * sum(F_i [(m, length, s)] for s in range(-w_i, 0))
+                    else:
+                        for m in range(N):
+                            if m == i:
+                                continue
+                            G_il = sum(F_i [(m, length, s)]) * sum(F_i [(m, length, s)] for s in range(-w_i))
 
-            # TODO Berechnung des Shapleys von z
+            # Berechnung des Shapleys von shapley Values
+            phi = 0
+            sign = 0
+            if w_i > 0:
+                sign = 1
+            elif w_i == 0:
+                sign = 0
+            else:
+                sign = -1
+
+            first_term = 0
+            for length in range(K):
+                first_term += G_il / comp(N-1, length)
+            first_term = (1 / N) * first_term
+
+            second_term = 0
+            for m in range(max(i + 1, K + 1), N + 1):
+                second_term += R_im / m * comp(m - 1, K)
+
+            phi = sign * (first_term + second_term)
+        return phi
