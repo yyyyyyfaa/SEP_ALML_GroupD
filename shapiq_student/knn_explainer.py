@@ -4,7 +4,6 @@ from shapiq import Explainer, InteractionValues
 from scipy.special import comb
 
 
-
 class KNNExplainer(Explainer):
     def __init__(self, model, dataset: np.ndarray, labels, method: str):
         super(KNNExplainer, self).__init__(model, dataset)
@@ -13,27 +12,28 @@ class KNNExplainer(Explainer):
         self.labels = labels
 
     def explain_function(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
-        if self.method == 'standard_shapley':
+        if self.method == "standard_shapley":
             intercation_values = self.knn_shapley(x)
-        elif self.method == 'threshold':
-            threshold = kwargs['threshold']
-            x_query = kwargs['x_query']
-            num_classes = kwargs['num_classes']
+        elif self.method == "threshold":
+            threshold = kwargs["threshold"]
+            x_query = kwargs["x_query"]
+            num_classes = kwargs["num_classes"]
             interaction_values = self.threshold_knn_shapley(x_query, threshold, num_classes)
-        elif self.method == 'weighted':
-            gamma = kwargs['gamma']
-            interaction_values = self.weighted_knn_shapley(x,gamma)
+        elif self.method == "weighted":
+            gamma = kwargs["gamma"]
+            interaction_values = self.weighted_knn_shapley(x, gamma)
         else:
             print('Method must be one of "standard_shapley", "threshold", "weighted"')
 
         return intercation_values
 
-
     def knn_shapley(self, x_query):
         # TODO Implement knn shapley
         pass
 
-    def threshold_knn_shapley(self, x_query: tuple[float, float], threshold: float, num_classes: int) -> np.ndarray:
+    def threshold_knn_shapley(
+        self, x_query: tuple[float, float], threshold: float, num_classes: int
+    ) -> np.ndarray:
         """Berechnet die Threshold-KNN-Shapey Werte für einen Validierungspunkt.
 
         Args:
@@ -72,7 +72,6 @@ class KNNExplainer(Explainer):
                 term2 = (int(y_i == y_val) - (1 / num_classes)) / c_x
 
                 if c_x >= 2:
-
                     # Anzahl der Nachbarn von x_val in D-zi, mit gleiches Label haben
                     y_neighbors = y_minus_i[neighbor_indices_minus_zi]
                     c_plus = np.sum(y_neighbors == y_val)
@@ -97,9 +96,6 @@ class KNNExplainer(Explainer):
 
         return phi
 
-
-
     def weighted_knn_shapley(self, x_query, gamma):
         # TODO Implement weighted
         pass
-
