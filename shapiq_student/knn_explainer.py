@@ -1,7 +1,14 @@
 import numpy as np
 from shapiq import Explainer, InteractionValues
-from math import comp
 
+def factorial(n):
+    if n == 0 or n == 1:
+        return 1
+    else:
+        return n * factorial(n - 1)
+
+def comp(n, k):
+    return factorial(n) // (factorial(k) * factorial(n - k))
 
 class KNNExplainer(Explainer):
     def __init__(
