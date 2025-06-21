@@ -123,14 +123,24 @@ class KNNExplainer(Explainer):
             sign = []
             sign = np.sign(w_i[i])
 
+            #first_term = 0
+            #for length in range(K):
+            #    first_term += G_il[i] / comb(N-1, length)
+            #first_term = (1 / N) * first_term
+
+            #second_term = 0
+            #for m in range(max(i + 1, K + 1), N + 1):
+            #    second_term += R_im / m * comb(m - 1, K)
+
             first_term = 0
-            for length in range(K):
-                first_term += G_il[i] / comb(N-1, length)
+            for l in range(1, K):
+                first_term += G_il.get(l, 0) / (N - l)
             first_term = (1 / N) * first_term
 
             second_term = 0
-            for m in range(max(i + 1, K + 1), N + 1):
-                second_term += R_im / m * comb(m - 1, K)
+            for m in range(upper, N):
+                denom = m * (m - K) if (m - K) != 0 else 1
+                second_term += R_im.get(m, 0) / denom
 
             phi[i-1] = sign * (first_term + second_term)
         return phi
