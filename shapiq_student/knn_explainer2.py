@@ -36,7 +36,7 @@ class KNNExplainer(Explainer):
         X = x_train
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz
-        phi = np.ndarray(N)
+        phi = np.zeros(N)
 
         # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
@@ -75,26 +75,36 @@ class KNNExplainer(Explainer):
 
             # Berechnung von F
             for length in range(2, K-1):
-                F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length -1))
+                for s in w_k:
+                    F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length))
+                print(f"F_0[{length}] = {F_0[length]}")  # Debugging-Ausgabe
                 for m in range(length, N):
                     if m == i:
                         continue
                     for s in w_k:
                         w_m = w_j[m]
                         F_i[(m, length, s)] = F_0.get((s - w_m), 0)
+                        print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}")
 
             # Berechnung von R_0
             R_0 = {}
+            R_im = {}
             upper = max(i + 1, K + 1)
             for s in w_k:
                 R_0[s] = sum(F_i.get((t, K - 1, s), 0) for t in range(1, upper - 1) if t != i)
+                print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
+                print(i)
+                print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
+
             #Berechnung von R_im
             for m in range(upper, N):
-                if Y_sorted == y_val:
+                if Y_sorted[i] == y_val:
                     R_im = sum(R_0[s] for s in range(- w_i, - w_m))
                 else:
                     R_im = sum(R_0[s] for s in range(- w_m, - w_i))
-                R_0 = R_0 + F_i.get((m, K - 1, s), 0)
+                for s in w_k:
+                    R_0 = R_0 + F_i.get((m, K - 1, s), 0)
+
 
             # Berechnung von G
             G_i0 = {}
@@ -105,9 +115,9 @@ class KNNExplainer(Explainer):
                     for length in range(1, K - 1):
                         G_il = {}
                         if Y_sorted[length-1] == y_val:
-                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
+                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
                         else:
-                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
+                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
 
             # Berechnung des Shapleys von shapley Values
             sign = []
@@ -115,12 +125,12 @@ class KNNExplainer(Explainer):
 
             first_term = 0
             for length in range(K):
-                first_term += G_il / comb(N-1, length)
+                first_term += G_il[i] / comb(N-1, length)
             first_term = (1 / N) * first_term
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
                 second_term += R_im / m * comb(m - 1, K)
 
-            phi[i] = sign * (first_term + second_term)
+            phi[i-1] = sign * (first_term + second_term)
         return phi
