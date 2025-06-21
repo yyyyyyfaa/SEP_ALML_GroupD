@@ -99,11 +99,11 @@ class KNNExplainer(Explainer):
             #Berechnung von R_im
             for m in range(upper, N):
                 if Y_sorted[i] == y_val:
-                    R_im[m] = sum(R_0[s] for s in range(- w_i, - w_m))
+                    R_im = sum(R_0[s] for s in range(- w_i, - w_m))
                 else:
-                    R_im[m] = sum(R_0[s] for s in range(- w_m, - w_i))
+                    R_im = sum(R_0[s] for s in range(- w_m, - w_i))
                 for s in w_k:
-                    R_0[s] += + F_i.get((m, K - 1, s), 0) #previous: R_0 = R_0 + F_i.get((m, K - 1, s), 0)
+                    R_0 = R_0 + F_i.get((m, K - 1, s), 0)
 
 
             # Berechnung von G
@@ -123,24 +123,14 @@ class KNNExplainer(Explainer):
             sign = []
             sign = np.sign(w_i[i])
 
-            #first_term = 0
-            #for length in range(K):
-            #    first_term += G_il[i] / comb(N-1, length)
-            #first_term = (1 / N) * first_term
-
-            #second_term = 0
-            #for m in range(max(i + 1, K + 1), N + 1):
-            #    second_term += R_im / m * comb(m - 1, K)
-
             first_term = 0
-            for l in range(1, K):
-                first_term += G_il.get(l, 0) / (N - l)
+            for length in range(K):
+                first_term += G_il[i] / comb(N-1, length)
             first_term = (1 / N) * first_term
 
             second_term = 0
-            for m in range(upper, N):
-                denom = m * (m - K) if (m - K) != 0 else 1
-            second_term += R_im.get(m, 0) / denom
+            for m in range(max(i + 1, K + 1), N + 1):
+                second_term += R_im / m * comb(m - 1, K)
 
-            phi[i] = sign * (first_term + second_term)
+            phi[i-1] = sign * (first_term + second_term)
         return phi
