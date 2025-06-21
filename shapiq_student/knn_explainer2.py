@@ -73,7 +73,7 @@ class KNNExplainer(Explainer):
 
             # Berechnung von F
             for length in range(2, K-1):
-                F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length -1)) 
+                F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length -1))
                 for m in range(length, N):
                     if m == i:
                         continue
@@ -96,22 +96,16 @@ class KNNExplainer(Explainer):
 
             # Berechnung von G
             G_i0 = {}
-            for count in range(0, len(w_i)):
+            for count in range(1, len(w_i)):
                 if w_i[count] < 0:
                     G_i0[count] = -1
                 else:
                     for length in range(1, K - 1):
                         G_il = {}
                         if Y_sorted[length] == y_val:
-                            for m in range(N):
-                                if m == i:
-                                    continue
-                                G_il[length] = sum(F_i.get((m, length, s), 0)) * sum(F_i.get((m, length, s), 0) for s in range(-w_i[s], 0))
+                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(-w_i[s], 0))
                         else:
-                            for m in range(N):
-                                if m == i:
-                                    continue
-                                G_il[m] = sum(F_i.get((m, length, s), 0)) * sum(F_i.get((m, length, s), 0) for s in range(-w_i, 0))
+                                G_il[m] = sum(F_i.get((m, length, s), 0)) * sum(F_i.get((m, length, s), 0) for s in range(0, -w_i))
 
             # Berechnung des Shapleys von shapley Values
             phi = 0
