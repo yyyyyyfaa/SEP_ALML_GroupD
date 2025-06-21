@@ -3,12 +3,13 @@ from shapiq import Explainer, InteractionValues
 
 
 def factorial(n):
-    if n == 0 or n == 1:
+    if n in {0, 1} or n < 0:
         return 1
-    else:
-        return n * factorial(n - 1)
+    return n * factorial(n - 1)
 
 def comb(n, k):
+    if k < 0 or k > n:
+        return 1
     return factorial(n) // (factorial(k) * factorial(n - k))
 
 class KNNExplainer(Explainer):
@@ -35,6 +36,7 @@ class KNNExplainer(Explainer):
         X = x_train
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz
+        phi = np.ndarray(N)
 
         # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
@@ -102,20 +104,14 @@ class KNNExplainer(Explainer):
                 else:
                     for length in range(1, K - 1):
                         G_il = {}
-                        if Y_sorted[length] == y_val:
-                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(-w_i[s], 0))
+                        if Y_sorted[length-1] == y_val:
+                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
                         else:
-                                G_il[m] = sum(F_i.get((m, length, s), 0)) * sum(F_i.get((m, length, s), 0) for s in range(0, -w_i))
+                                G_il = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
 
             # Berechnung des Shapleys von shapley Values
-            phi = 0
-            sign = 0
-            if w_i > 0:
-                sign = 1
-            elif w_i == 0:
-                sign = 0
-            else:
-                sign = -1
+            sign = []
+            sign = np.sign(w_i[i])
 
             first_term = 0
             for length in range(K):
@@ -126,5 +122,5 @@ class KNNExplainer(Explainer):
             for m in range(max(i + 1, K + 1), N + 1):
                 second_term += R_im / m * comb(m - 1, K)
 
-            phi = sign * (first_term + second_term)
+            phi[i] = sign * (first_term + second_term)
         return phi
