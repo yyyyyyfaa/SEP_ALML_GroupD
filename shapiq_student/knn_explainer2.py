@@ -99,11 +99,11 @@ class KNNExplainer(Explainer):
             #Berechnung von R_im
             for m in range(upper, N):
                 if Y_sorted[i] == y_val:
-                    R_im = sum(R_0[s] for s in range(- w_i, - w_m))
+                    R_im[m] = sum(R_0[s] for s in range(- w_i, - w_m))
                 else:
-                    R_im = sum(R_0[s] for s in range(- w_m, - w_i))
+                    R_im[m] = sum(R_0[s] for s in range(- w_m, - w_i))
                 for s in w_k:
-                    R_0 = R_0 + F_i.get((m, K - 1, s), 0)
+                    R_0[s] += + F_i.get((m, K - 1, s), 0) #previous: R_0 = R_0 + F_i.get((m, K - 1, s), 0)
 
 
             # Berechnung von G
