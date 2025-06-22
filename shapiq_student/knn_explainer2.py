@@ -39,8 +39,8 @@ class KNNExplainer(Explainer):
             #print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}") # Debugging-Ausgabe
         X = x_train
         Y = y_train
-        N = len(X)  # Menge der Daten im Datensatz
-        #print(f"Anzahl der Datenpunkte im Datensatz: {N}")
+        N = len(X)  # Menge der Daten im Datensatz 
+        #print(f"Anzahl der Datenpunkte im Datensatz: {N}") # Debugging-Ausgabe
         phi = np.zeros(N)
 
         # Berechnung der distanz
@@ -61,6 +61,8 @@ class KNNExplainer(Explainer):
         w_k = np.linspace(0, K, (2**b) * K)
         w_i_discret = np.array([w_k[np.argmin(np.abs(w_k - w_i_discret))] for w_i_discret in w_i])
         w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i_discret
+        #print(w_k)  # Debugging-Ausgabe
+        #print(w_i_discret)  # Debugging-Ausgabe
 
         for i in range(1, N):
             # Initialisierung von F als Dictionary
@@ -84,13 +86,18 @@ class KNNExplainer(Explainer):
             for length in range(2, K-1):
                 for s in w_k:
                     F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length))
-                    #print(f"F_0[{length}] = {F_0[length]}")  # Debugging-Ausgabe
+                    #print(F_i)  # Debugging-Ausgabe
+                    #print(f"F_0[{i}] = {F_0[i]}")  # Debugging-Ausgabe
                 for m in range(length, N):
                     if m == i:
                         continue
                     for s in w_k:
                         w_m = w_j[m]
+                        #print(s-w_m)
                         F_i[(m, length, s)] = F_0.get((s - w_m), 0)
+                        #print(F_0.get(s - w_m,))  # Debugging-Ausgabe
+                        #print(s-w_m) # Debugging-Ausgabe
+                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
                         #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe
 
             # Berechnung von R_0
@@ -99,6 +106,7 @@ class KNNExplainer(Explainer):
             upper = max(i + 1, K + 1)
             for s in w_k:
                 R_0[s] = sum(F_i.get((t, K - 1, s), 0) for t in range(1, upper - 1) if t != i)
+                #print(F_i.get((t, K - 1, s), 0))  # Debugging-Ausgabe
                 #print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
                 #print(i) # Debugging-Ausgabe
                 #print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
@@ -107,10 +115,13 @@ class KNNExplainer(Explainer):
             for m in range(upper, N):
                 if Y_sorted[i] == y_val:
                     R_im = sum(R_0[s] for s in range(- w_i, - w_m))
+                    #print(f"R_im == {R_im}")  # Debugging-Ausgabe
                 else:
                     R_im = sum(R_0[s] for s in range(- w_m, - w_i))
+                    #print(f"R_im != {R_im}")  # Debugging-Ausgabe
                 for s in w_k:
                     R_0 = R_0 + F_i.get((m, K - 1, s), 0)
+                    #print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
 
 
             # Berechnung von G
@@ -146,7 +157,5 @@ class KNNExplainer(Explainer):
 
             phi[i] = sign * (first_term + second_term)
             
-            print(f"Shapley-Wert für den Testpunkt {i + 1} von {len(x_test)}: {phi[i]}") # Debugging-Ausgabe
-            print(w_k)  # Debugging-Ausgabe
-            print(w_i_discret)  # Debugging-Ausgabe
+            #print(f"Shapley-Wert für den Testpunkt {i + 1} von {len(x_test)}: {phi[i]}") # Debugging-Ausgabe
         return phi
