@@ -34,13 +34,13 @@ class KNNExplainer(Explainer):
         # if K = null ??
         for i in range(len(x_test)):
             x_val, y_val = x_test[i], y_test[i]
-            print(x_test[i])
-            print(y_test[i])
-            print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}")
+            #print(x_test[i]) # Debugging-Ausgabe
+            #print(y_test[i]) # Debugging-Ausgabe
+            #print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}") # Debugging-Ausgabe
         X = x_train
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz
-        print(f"Anzahl der Datenpunkte im Datensatz: {N}")
+        #print(f"Anzahl der Datenpunkte im Datensatz: {N}")
         phi = np.zeros(N)
 
         # Berechnung der distanz
@@ -71,25 +71,27 @@ class KNNExplainer(Explainer):
                 for length in range(1, K - 1):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
+                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
 
             for m in range(1, N):
                 if m == i:
                     continue
                 for s in w_k:
                     F_i[(m, 1, s)] = 1
+                    print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
             # Berechnung von F
             for length in range(2, K-1):
                 for s in w_k:
                     F_0[length] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length))
-                print(f"F_0[{length}] = {F_0[length]}")  # Debugging-Ausgabe
+                    #print(f"F_0[{length}] = {F_0[length]}")  # Debugging-Ausgabe
                 for m in range(length, N):
                     if m == i:
                         continue
                     for s in w_k:
                         w_m = w_j[m]
                         F_i[(m, length, s)] = F_0.get((s - w_m), 0)
-                        print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}")
+                        #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe
 
             # Berechnung von R_0
             R_0 = {}
@@ -97,9 +99,9 @@ class KNNExplainer(Explainer):
             upper = max(i + 1, K + 1)
             for s in w_k:
                 R_0[s] = sum(F_i.get((t, K - 1, s), 0) for t in range(1, upper - 1) if t != i)
-                print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
-                print(i)
-                print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
+                #print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
+                #print(i) # Debugging-Ausgabe
+                #print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
 
             #Berechnung von R_im
             for m in range(upper, N):
