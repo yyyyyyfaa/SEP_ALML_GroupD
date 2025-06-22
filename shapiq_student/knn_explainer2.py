@@ -56,13 +56,13 @@ class KNNExplainer(Explainer):
         )  # sortierter wieder zusammengefügter Datensatz
 
         # Berechnung der Gewichtung
+        b = 3 #Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
         w_i = np.exp(-sorted_distance / gamma)  # RBF Kernel weight
-        w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i
+        w_k = np.linspace(0, K, (2**b) * K)
+        w_i_discret = np.array([w_k[np.argmin(np.abs(w_k - w_i_discret))] for w_i_discret in w_i])
+        w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i_discret
 
         for i in range(1, N):
-            b = 3 #Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
-            w_k = np.linspace(0, K, (2**b) * K)
-
             # Initialisierung von F als Dictionary
             F_i = {}
             F_0 = {}
@@ -71,14 +71,14 @@ class KNNExplainer(Explainer):
                 for length in range(1, K - 1):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
-                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
 
             for m in range(1, N):
                 if m == i:
                     continue
                 for s in w_k:
                     F_i[(m, 1, s)] = 1
-                    print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
+                    #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
             # Berechnung von F
             for length in range(2, K-1):
@@ -116,28 +116,37 @@ class KNNExplainer(Explainer):
             # Berechnung von G
             G_i0 = {}
             for count in range(1, len(w_i)):
-                if w_i[count] < 0:
+                #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
+                if w_i_discret[count] < 0:
                     G_i0[count] = -1
                 else:
                     for length in range(1, K - 1):
                         G_il = {}
                         if Y_sorted[i] == y_val:
                                 G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
+                                #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
                         else:
                                 G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
+                                #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
             sign = []
-            sign = np.sign(w_i[i])
+            sign = np.sign(w_i_discret[i])
 
             first_term = 0
             for length in range(K):
                 first_term += G_il[i] / comb(N-1, length)
             first_term = (1 / N) * first_term
+            #print(f"Erster Term: {first_term}") # Debugging-Ausgabe
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
                second_term += R_im / m * comb(m - 1, K)
+            #print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
+            
+            print(f"Shapley-Wert für den Testpunkt {i + 1} von {len(x_test)}: {phi[i]}") # Debugging-Ausgabe
+            print(w_k)  # Debugging-Ausgabe
+            print(w_i_discret)  # Debugging-Ausgabe
         return phi
