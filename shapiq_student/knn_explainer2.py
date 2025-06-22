@@ -32,10 +32,12 @@ class KNNExplainer(Explainer):
     def weighted_knn_shapley(self, x_train, y_train, x_test, y_test, gamma, K):
         # Implement weighted
         # if K = null ??
-        x_val, y_val = x_test, y_test
+        for i in range(len(x_test)):
+            x_val, y_val = x_test[i], y_test[i]
         X = x_train
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz
+        print(f"Anzahl der Datenpunkte im Datensatz: {N}")
         phi = np.zeros(N)
 
         # Berechnung der distanz
