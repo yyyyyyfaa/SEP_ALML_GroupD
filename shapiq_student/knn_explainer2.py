@@ -34,6 +34,9 @@ class KNNExplainer(Explainer):
         # if K = null ??
         for i in range(len(x_test)):
             x_val, y_val = x_test[i], y_test[i]
+            print(x_test[i])
+            print(y_test[i])
+            print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}")
         X = x_train
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz
@@ -116,7 +119,7 @@ class KNNExplainer(Explainer):
                 else:
                     for length in range(1, K - 1):
                         G_il = {}
-                        if Y_sorted[length-1] == y_val:
+                        if Y_sorted[i] == y_val:
                                 G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
                         else:
                                 G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
