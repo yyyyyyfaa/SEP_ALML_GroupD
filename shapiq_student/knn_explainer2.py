@@ -62,9 +62,9 @@ class KNNExplainer(Explainer):
         w_k = np.linspace(0, K, (intervalls) * K)
         w_i_discret = np.array([w_k[np.argmin(np.abs(w_k - w_i_discret))] for w_i_discret in w_i])
         w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i_discret
-        print(w_k)  # Debugging-Ausgabe
-        print(w_i_discret)  # Debugging-Ausgabe
-        print(w_j)  # Debugging-Ausgabe
+        #print(w_k)  # Debugging-Ausgabe
+        #print(w_i_discret)  # Debugging-Ausgabe
+        #print(w_j)  # Debugging-Ausgabe
 
         for i in range(1, N):
             # Initialisierung von F als Dictionary
@@ -78,13 +78,13 @@ class KNNExplainer(Explainer):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
                         F_i[(m, 1, s)] = 1
-                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
-                        print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
+                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
             # Berechnung von F
             for length in range(2, K-1):
                 for s in w_k:
-                    F_0[i] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length))
+                    F_0[i] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length - 1))
                     #print(F_i)  # Debugging-Ausgabe
                     #print(f"F_0[{i}] = {F_0[i]}")  # Debugging-Ausgabe
                 for m in range(length, N):
@@ -94,8 +94,8 @@ class KNNExplainer(Explainer):
                         w_m = w_j[m]
                         #print(s-w_m)
                         F_i[(m, length, s)] = F_0.get((round(s - w_m, intervalls)), 0)
-                        print(F_0.get(round(s - w_m, 8) ,0))  # Debugging-Ausgabe
-                        #print(round(s-w_m,8)) # Debugging-Ausgabe
+                        #print(F_0.get(round(s - w_m, intervalls) ,0))  # Debugging-Ausgabe
+                        #print(round(s-w_m, intervalls)) # Debugging-Ausgabe
                         #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
                         #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe
 
