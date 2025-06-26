@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
 from shapiq_student.knn_explainer import KNNExplainer
 
 
@@ -12,6 +14,9 @@ class TestTreshold(unittest.TestCase):
         ])
         self.y_train = np.array([0, 1, 0])
 
+        knn = KNeighborsClassifier(n_neighbors=5)
+        knn.fit(self.X_train, self.y_train)
+
         self.explainer = KNNExplainer(
             self,
             dataset=self.X_train,
@@ -19,7 +24,9 @@ class TestTreshold(unittest.TestCase):
             method="threshold"
         )
 
+
     def test_against_manual_knn_threshold(self):
+
         x_query = (np.array([1.0, 1.0]), 1)
         threshold = 1.5
         num_classes = 2
@@ -33,7 +40,7 @@ class TestTreshold(unittest.TestCase):
 
     def test_shapley_all_zero_if_outside_threshold(self):
         x_query = (np.array([1.0, 1.0]), 1)
-        threshold = 0.2
+        threshold = -0.1
         num_classes = 2
 
         result = self.explainer.threshold_knn_shapley(x_query, threshold, num_classes)
