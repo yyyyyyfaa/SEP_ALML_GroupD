@@ -5,27 +5,41 @@ from scipy.special import comb
 
 
 class KNNExplainer(Explainer):
-    def __init__(self, model, dataset: np.ndarray, labels, method: str):
-        super(KNNExplainer, self).__init__(model, dataset)
-        self.dataset = dataset
-        self.method = method
-        self.labels = labels
+    def __init__(self,
+        model,
+        data: np.ndarray,
+        labels: np.ndarray,
+        class_index = int | None,
+        model_name : str = None,
+        max_order: int = 1,
+        index = "SV"):
+            super().__init__(model, data, class_index, max_order=max_order, index = index)
+            self.model = model
+            self.dataset = data
+            self.labels = labels
+            self.class_index = class_index
+            self.N, self.M = data.shape
+            self.model_name = model_name
+            self.max_order = max_order
+            self.index = "SV"
 
-    def explain_function(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
-        if self.method == "standard_shapley":
-            intercation_values = self.knn_shapley(x)
-        elif self.method == "threshold":
+
+    def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
+        if self.model_name == "knn_basic":
+            shapley_values = self.knn_shapley(x)
+        elif self.model_name == "knn_radius":
             threshold = kwargs["threshold"]
             x_query = kwargs["x_query"]
             num_classes = kwargs["num_classes"]
-            interaction_values = self.threshold_knn_shapley(x_query, threshold, num_classes)
-        elif self.method == "weighted":
+            shapley_values = self.threshold_knn_shapley(x_query, threshold, num_classes)
+        elif self.model_name == "knn_weighted":
             gamma = kwargs["gamma"]
-            interaction_values = self.weighted_knn_shapley(x, gamma)
+            shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
-            print('Method must be one of "standard_shapley", "threshold", "weighted"')
+            raise ValueError("Unknown mode in KNNExplainer.")
 
-        return intercation_values
+
+        return np.array(shapley_values)
 
     def knn_shapley(self, x_query):
         # TODO Implement knn shapley
