@@ -31,6 +31,14 @@ class TestTreshold(unittest.TestCase):
         self.assertEqual(result.shape, expected_result.shape)
         np.testing.assert_allclose(result, expected_result, atol=1e-6)
 
+    def test_shapley_all_zero_if_outside_threshold(self):
+        x_query = (np.array([1.0, 1.0]), 1)
+        threshold = 0.2
+        num_classes = 2
+
+        result = self.explainer.threshold_knn_shapley(x_query, threshold, num_classes)
+        self.assertTrue(np.all(result == 0))
+
 
 if __name__ == "__main__":
     unittest.main()
