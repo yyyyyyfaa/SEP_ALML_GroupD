@@ -63,6 +63,7 @@ class KNNExplainer(Explainer):
         w_i_discret = np.array([w_k[np.argmin(np.abs(w_k - w_i_discret))] for w_i_discret in w_i])
         w_j = (2 * (Y_sorted == y_val).astype(int) - 1) * w_i_discret
         #print(w_k)  # Debugging-Ausgabe
+        #print(w_i)  # Debugging-Ausgabe
         #print(w_i_discret)  # Debugging-Ausgabe
         #print(w_j)  # Debugging-Ausgabe
 
@@ -72,17 +73,19 @@ class KNNExplainer(Explainer):
             F_0 = {}
             # F als 0 setzen
             for m in range(1, N):
-                if m == i:
-                    continue
                 for length in range(1, K - 1):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
-                        F_i[(m, 1, s)] = 1
-                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
-                        #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
+
+            for m in range(1, N):
+                if m == i:
+                    continue
+                F_i[(m, 1, w_j[m])] = 1
+                #print(f"F_i[{m}, {1}, {w_j[m]}] = {F_i[(m, 1, w_j[m])]}")  # Debugging-Ausgabe
+                #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
             # Berechnung von F
-            for length in range(2, K-1):
+            '''for length in range(2, K-1):
                 for s in w_k:
                     F_0[i] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length - 1))
                     #print(F_i)  # Debugging-Ausgabe
@@ -97,26 +100,30 @@ class KNNExplainer(Explainer):
                         #print(F_0.get(round(s - w_m, intervalls) ,0))  # Debugging-Ausgabe
                         #print(round(s-w_m, intervalls)) # Debugging-Ausgabe
                         #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
-                        #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe
-
+                        #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe'''
+            for length in range(2, K-1):
+                for m in range (length, N):
+                    for s in w_k:
+                        w_m = w_j[m]
+                        F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
+                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
             # Berechnung von R_0
             R_0 = {}
             R_im = {}
             upper = max(i + 1, K + 1)
             for s in w_k:
                 R_0[s] = sum(F_i.get((t, K - 1, s), 0) for t in range(1, upper - 1) if t != i)
-                #print(F_i.get((t, K - 1, s), 0))  # Debugging-Ausgabe
-                #print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
+                print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
                 #print(i) # Debugging-Ausgabe
-                #print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
+                print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
 
             #Berechnung von R_im
             for m in range(upper, N):
                 if Y_sorted[i] == y_val:
-                    R_im = sum(R_0[s] for s in range(- w_i, - w_m))
+                    R_im = sum(R_0[s] for s in range(- w_i_discret, - w_j[m]))
                     #print(f"R_im == {R_im}")  # Debugging-Ausgabe
                 else:
-                    R_im = sum(R_0[s] for s in range(- w_m, - w_i))
+                    R_im = sum(R_0[s] for s in range(- w_j[m], - w_i_discret))
                     #print(f"R_im != {R_im}")  # Debugging-Ausgabe
                 for s in w_k:
                     R_0 = R_0 + F_i.get((m, K - 1, s), 0)

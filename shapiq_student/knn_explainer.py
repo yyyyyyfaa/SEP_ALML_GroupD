@@ -73,7 +73,7 @@ class KNNExplainer(Explainer):
             for m in range(1, N):
                 if m == i:
                     continue
-                F_i = 1
+                F_i[(m, 1, s)] = 1
 
             # Berechnung von F
             for length in range(2, K-1):
