@@ -80,15 +80,15 @@ class KNNExplainer(Explainer):
                 if m == i:
                     continue
                 F_i[(m, 1, w_j[m])] = 1
-                print(f"F_i[{m}, {1}, {w_j[m]}] = {F_i[(m, 1, w_j[m])]}")  # Debugging-Ausgabe
-                print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
+                #print(f"F_i[{m}, {1}, {w_j[m]}] = {F_i[(m, 1, w_j[m])]}")  # Debugging-Ausgabe
+                #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
             for length in range(2, K-1):
                 for m in range (length, N):
                     for s in w_k:
                         w_m = w_j[m]
                         F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
-                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
 
             # Berechnung von R_0
             R_im = {}
@@ -103,7 +103,6 @@ class KNNExplainer(Explainer):
                     print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
                     print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
                     print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                    print(t)
                     if Y_sorted[i] == y_val:
                         R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_i_discret[i] <= s <= -w_j[m])
                         #R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_i_discret, - w_j[m]))
