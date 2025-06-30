@@ -88,29 +88,37 @@ class KNNExplainer(Explainer):
                     for s in w_k:
                         w_m = w_j[m]
                         F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
-                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        #print(f"Berechnung von F_i für m={m}, length={length}, s={s}")  # Debugging-Ausgabe
+                        #print(f"F_i[t, length - 1, s - w_m] = {F_i.get(((t, length - 1, s - w_m), 0) for t in range(1, m))}")  # Debugging-Ausgabe
 
             # Berechnung von R_0
             R_im = {}
             upper = max(i + 1, K + 1)
-            print(f"upper = {upper}")  # Debugging-Ausgabe
-            print(f"N = {N}")  # Debugging-Ausgabe
+            #print(f"upper = {upper}")  # Debugging-Ausgabe
+            #print(f"N = {N}")  # Debugging-Ausgabe
+            #print(F_i)  # Debugging-Ausgabe
             #Berechnung von R_im
             for m in range(upper, N):
-                print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
+                #print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
                 for t in range(1, m - 1):
-                    print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
-                    print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
-                    print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
-                    print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                    #print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
+                    #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
+                    #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
+                    #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
                     if Y_sorted[i] == y_val:
-                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_i_discret[i] <= s <= -w_j[m])
-                        #R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_i_discret, - w_j[m]))
-                        print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
+                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[i] <= s <= -w_j[m])
+                        print(-w_j[i], -w_j[m])  # Debugging-Ausgabe
+                        #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                        #print(t, K - 1, s)  # Debugging-Ausgabe
+                        #R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- w_j[i], - w_j[m]))
+                        #print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
                     else:
-                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[m] <= s <= -w_i_discret[i])
-                        #R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_j[m], - w_i_discret))
-                        print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
+                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[m] <= s <= -w_j[i])
+                        #R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- w_j[m], - w_j[i]))
+                        #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                        #print(t, K - 1, s)  # Debugging-Ausgabe
+                        #print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
             G_i0 = {}
@@ -125,7 +133,7 @@ class KNNExplainer(Explainer):
                                 G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
                                 #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
                         else:
-                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(0, len(-w_i)))
+                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
                                 #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
