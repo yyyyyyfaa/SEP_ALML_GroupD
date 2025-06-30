@@ -40,7 +40,7 @@ class KNNExplainer(Explainer):
             x_query = kwargs["x_query"]
             num_classes = kwargs["num_classes"]
             shapley_values = self.threshold.threshold_knn_shapley(x_query, threshold, num_classes)
-            print("shapley_values:", shapley_values)
+
             print(threshold, radius)
             print(x_query, num_classes)
         elif gamma is not None:
@@ -58,7 +58,7 @@ class KNNExplainer(Explainer):
             index="SV",
             baseline_value=0.0,
         )
-
+        print("shapley_values:", shapley_values)
         return interaction_values
 
     def knn_shapley(self, x_query):

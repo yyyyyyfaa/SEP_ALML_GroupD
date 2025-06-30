@@ -21,7 +21,6 @@ class KNNExplainer3(Explainer):
             self.N, self.M = data.shape
             self.max_order = max_order
             self.index = "SV"
-            self.threshold = Threshold(model, data, labels, class_index)
 
             if hasattr(model, 'weights') and model.weights == 'distance':
                 self.mode = 'weighted'
@@ -34,21 +33,24 @@ class KNNExplainer3(Explainer):
     def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         radius = kwargs.get("radius")
         gamma = kwargs.get("gamma")
-        if radius is not None and radius > 0:
+        if radius is not None:
+            # threshold = radius
+            # x_query = kwargs["x_query"]
+            # num_classes = kwargs["num_classes"]
+            X_test = x
+            y_test = kwargs['y_test']
             threshold = radius
-            x_query = kwargs["x_query"]
-            num_classes = kwargs["num_classes"]
-            shapley_values = self.threshold.threshold_knn_shapley(x_query, threshold, num_classes)
-            print("shapley_values:", shapley_values)
-            print(threshold, radius)
-            print(x_query, num_classes)
+            K0 = kwargs['K0']
+            dis_metric = kwargs['dis_metric']
+            shapley_values = self.threshold_knn_shapley(X_test, y_test, threshold, K0, dis_metric)
+            #print(x_query, num_classes)
         elif gamma is not None:
             shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
             shapley_values = self.knn_shapley(x)
 
         n_features = x.shape[1] if len(x.shape) > 1 else x.shape[0]
-        print(n_features)
+
         interaction_values = InteractionValues(
             values=np.array(shapley_values),
             n_players=n_features,
@@ -57,7 +59,7 @@ class KNNExplainer3(Explainer):
             index="SV",
             baseline_value=0.0,
         )
-
+        print(shapley_values)
         return interaction_values
 
     def knn_shapley(self, x_query):
@@ -94,7 +96,7 @@ class KNNExplainer3(Explainer):
 
         return sv
 
-    def threshold_knn_shapley(self, x_test, y_test, tau=0, K0=0, dis_metric='cosine'):
+    def threshold_knn_shapley(self, x_test, y_test, tau=0, K0=0, dis_metric='euclidean'):
         train_samples = len(self.labels)
         shapley_values = np.zeros(train_samples)
         test_samples = len(y_test)
