@@ -105,10 +105,12 @@ class KNNExplainer(Explainer):
                     print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
                     print(t)
                     if Y_sorted[i] == y_val:
-                        R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_i_discret, - w_j[m]))
+                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_i_discret[i] <= s <= -w_j[m])
+                        #R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_i_discret, - w_j[m]))
                         print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
                     else:
-                        R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_j[m], - w_i_discret))
+                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[m] <= s <= -w_i_discret[i])
+                        #R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_j[m], - w_i_discret))
                         print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
@@ -139,7 +141,7 @@ class KNNExplainer(Explainer):
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
-               second_term += R_im[m] / m * comb(m - 1, K)
+               second_term += R_im.get(m, 0) / m * comb(m - 1, K)
             #print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
