@@ -70,7 +70,6 @@ class KNNExplainer(Explainer):
         for i in range(1, N):
             # Initialisierung von F als Dictionary
             F_i = {}
-            F_0 = {}
             # F als 0 setzen
             for m in range(1, N):
                 for length in range(1, K - 1):
@@ -84,51 +83,33 @@ class KNNExplainer(Explainer):
                 #print(f"F_i[{m}, {1}, {w_j[m]}] = {F_i[(m, 1, w_j[m])]}")  # Debugging-Ausgabe
                 #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
-            # Berechnung von F
-            '''for length in range(2, K-1):
-                for s in w_k:
-                    F_0[i] = sum(F_i.get((t, length - 1, s), 0) for t in range(1, length - 1))
-                    #print(F_i)  # Debugging-Ausgabe
-                    #print(f"F_0[{i}] = {F_0[i]}")  # Debugging-Ausgabe
-                for m in range(length, N):
-                    if m == i:
-                        continue
-                    for s in w_k:
-                        w_m = w_j[m]
-                        #print(s-w_m)
-                        F_i[(m, length, s)] = F_0.get((round(s - w_m, intervalls)), 0)
-                        #print(F_0.get(round(s - w_m, intervalls) ,0))  # Debugging-Ausgabe
-                        #print(round(s-w_m, intervalls)) # Debugging-Ausgabe
-                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
-                        #print(f"length={length}, m={m}, s={s}, F_0 key={s - w_m}, F_0 val={F_0.get(s - w_m, 'not set')}") # Debugging-Ausgabe'''
             for length in range(2, K-1):
                 for m in range (length, N):
                     for s in w_k:
                         w_m = w_j[m]
                         F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
-                        print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+                        #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
+
             # Berechnung von R_0
-            R_0 = {}
             R_im = {}
             upper = max(i + 1, K + 1)
-            for s in w_k:
-                R_0[s] = sum(F_i.get((t, K - 1, s), 0) for t in range(1, upper - 1) if t != i)
-                print(f"F_i[{i}, {K - 1}, {s}] = {F_i.get((i, K - 1, s), 0)}")  # Debugging-Ausgabe
-                #print(i) # Debugging-Ausgabe
-                print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
-
+            print(f"upper = {upper}")  # Debugging-Ausgabe
+            print(f"N = {N}")  # Debugging-Ausgabe
             #Berechnung von R_im
             for m in range(upper, N):
-                if Y_sorted[i] == y_val:
-                    R_im = sum(R_0[s] for s in range(- w_i_discret, - w_j[m]))
-                    #print(f"R_im == {R_im}")  # Debugging-Ausgabe
-                else:
-                    R_im = sum(R_0[s] for s in range(- w_j[m], - w_i_discret))
-                    #print(f"R_im != {R_im}")  # Debugging-Ausgabe
-                for s in w_k:
-                    R_0 = R_0 + F_i.get((m, K - 1, s), 0)
-                    #print(f"R_0[{s}] = {R_0[s]}")  # Debugging-Ausgabe
-
+                print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
+                for t in range(1, m - 1):
+                    print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
+                    print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
+                    print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
+                    print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                    print(t)
+                    if Y_sorted[i] == y_val:
+                        R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_i_discret, - w_j[m]))
+                        print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
+                    else:
+                        R_im[m] = sum(F_i[t, K - 1, s] for s in range(- w_j[m], - w_i_discret))
+                        print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
             G_i0 = {}
@@ -158,7 +139,7 @@ class KNNExplainer(Explainer):
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
-               second_term += R_im / m * comb(m - 1, K)
+               second_term += R_im[m] / m * comb(m - 1, K)
             #print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
