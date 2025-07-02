@@ -3,9 +3,9 @@ from math import comb
 import numpy as np
 
 class Threshold:
-    def __init__(self, model, dataset, labels, class_index):
+    def __init__(self, model, data, labels, class_index):
         self.model = model
-        self.dataset = dataset
+        self.dataset = data
         self.labels = labels
         self.class_index = class_index
 
@@ -23,7 +23,6 @@ class Threshold:
             np.ndarry: Ein Array mit den berechneten Spaley-Werten.
         """
         x_val, y_val = x_query
-        #y_val = self.class_index
         X, y = self.dataset, self.labels
         N = self.dataset.shape[0]  # Menge der Trainingspunkte
 

@@ -92,6 +92,8 @@ class TestExplainer:
         )
         explanation_pred_class = explainer.explain(x=x_explain_multiclass)
         explanation_pred_class_second = explainer.explain(x=x_explain_multiclass)
+        # print(explanation_pred_class)
+        # print(explanation_pred_class_second)
 
         # make explanation for different class and check if it is different
         other_class_index = 0
