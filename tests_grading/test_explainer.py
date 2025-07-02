@@ -9,7 +9,7 @@ import pytest
 from shapiq import Explainer, InteractionValues
 from sklearn.neighbors import KNeighborsClassifier
 
-from shapiq_student.knn_explainer import KNNExplainer
+from shapiq_student import KNNExplainer
 
 DATA_DIM = 2  # number of dimensions in the KNNExplainer's data parameter expects
 LABELS_DIM = 1  # number of dimensions in the KNNExplainer's labels parameter expects
@@ -92,6 +92,8 @@ class TestExplainer:
         )
         explanation_pred_class = explainer.explain(x=x_explain_multiclass)
         explanation_pred_class_second = explainer.explain(x=x_explain_multiclass)
+        # print(explanation_pred_class)
+        # print(explanation_pred_class_second)
 
         # make explanation for different class and check if it is different
         other_class_index = 0
