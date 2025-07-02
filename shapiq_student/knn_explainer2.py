@@ -66,6 +66,12 @@ class KNNExplainer(Explainer):
         #print(w_i)  # Debugging-Ausgabe
         #print(w_i_discret)  # Debugging-Ausgabe
         #print(w_j)  # Debugging-Ausgabe
+        #print(len(w_j))  # Debugging-Ausgabe
+
+        sorted_indices = np.argsort(w_j)
+        ranks = np.empty_like(sorted_indices)
+        ranks[sorted_indices] = np.arange(len(w_j))
+        #print(f"Ranks: {ranks}")  # Debugging-Ausgabe
 
         for i in range(1, N):
             # Initialisierung von F als Dictionary
@@ -102,53 +108,58 @@ class KNNExplainer(Explainer):
             for m in range(upper, N):
                 #print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
                 for t in range(1, m - 1):
-                    #print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
-                    #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
-                    #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
-                    #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                    if Y_sorted[i] == y_val:
-                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[i] <= s <= -w_j[m])
-                        print(-w_j[i], -w_j[m])  # Debugging-Ausgabe
+                    for s in w_k:
+                        #print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
+                        #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
+                        #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
                         #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                        #print(t, K - 1, s)  # Debugging-Ausgabe
-                        #R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- w_j[i], - w_j[m]))
-                        #print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
-                    else:
-                        R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in w_k if -w_j[m] <= s <= -w_j[i])
-                        #R_im[m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- w_j[m], - w_j[i]))
-                        #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                        #print(t, K - 1, s)  # Debugging-Ausgabe
-                        #print(f"R_im[{m}] = {R_im[m]}")  # Debugging-Ausgabe
+                        if Y_sorted[i] == y_val:
+                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[i], - ranks[m])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m -1))
+                            #print(f"s = {s}")  # Debugging-Ausgabe
+                            #print(-ranks[i], -ranks[m])  # Debugging-Ausgabe
+                            #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                            #print(t, K - 1, s)  # Debugging-Ausgabe
+                            #print(f"s = {s}")  # Debugging-Ausgabe
+                            print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
+                        else:
+                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[m], - ranks[i])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m -1))
+                            #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                            #print(t, K - 1, s)  # Debugging-Ausgabe
+                            print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
-            G_i0 = {}
+            G_il = {}
             for count in range(1, len(w_i)):
-                #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
-                if w_i_discret[count] < 0:
-                    G_i0[count] = -1
-                else:
-                    for length in range(1, K - 1):
-                        G_il = {}
-                        if Y_sorted[i] == y_val:
-                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
-                                #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
-                        else:
-                                G_il[i] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) * sum(F_i.get((m, length, s), 0) for s in range(len(-w_i), 0))
-                                #print(f"G_il[{i}] = {G_il[i]}")  # Debugging-Ausgabe
+                for s in w_k:
+                    #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
+                    if w_i_discret[count] < 0:
+                        G_il[count] = -1
+                    else:
+                        for length in range(1, K - 1):
+                            if Y_sorted[i] == y_val:
+                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i], 0))
+                                    #print(f"F_i.get((m, length, s), 0) {F_i.get((m, length, s), 0)}")  # Debugging-Ausgabe
+                                    #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
+                            else:
+                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(0, - ranks[i]))
+                                    #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
             sign = []
             sign = np.sign(w_i_discret[i])
 
             first_term = 0
-            for length in range(K):
-                first_term += G_il[i] / comb(N-1, length)
+            for length in range(K - 1):
+                #print(f"G_il.get(i, {length}) = {G_il.get(i, length)}")  # Debugging-Ausgabe
+                first_term += G_il.get(i, length) / comb(N-1, length)
+
             first_term = (1 / N) * first_term
             #print(f"Erster Term: {first_term}") # Debugging-Ausgabe
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
-               second_term += R_im.get(m, 0) / m * comb(m - 1, K)
+               second_term += R_im.get(i, m) / m * comb(m - 1, K)
+               print(f"R_im.get(i, {m}) = {R_im.get(i, m)}")  # Debugging-Ausgabe
             #print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
