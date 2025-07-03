@@ -160,16 +160,16 @@ class KNNExplainer(Explainer):
             first_term = 0
             for length in range(K):
                 #print(f"G_il.get(i, {length}) = {G_il.get(i, length)}")  # Debugging-Ausgabe
-                first_term += G_il.get(i, length) / comb(N-1, length)
+                first_term += G_il.get(i, length) / comb(N-1, length - 1)
 
             first_term = (1 / N) * first_term
-            #print(f"Erster Term: {first_term}") # Debugging-Ausgabe
+            print(f"Erster Term: {first_term}") # Debugging-Ausgabe
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
-               second_term += R_im.get(i, m) / m * comb(m - 1, K)
+               second_term += R_im.get(i, m) / (m * comb(m - 1, K))
                #print(f"R_im.get(i, {m}) = {R_im.get(i, m)}")  # Debugging-Ausgabe
-            #print(second_term) # Debugging-Ausgabe
+            print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
 
