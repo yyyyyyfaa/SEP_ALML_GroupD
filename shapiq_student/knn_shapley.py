@@ -1,6 +1,7 @@
 import numpy as np
 
 
+
 class KNNShapley:
 
     def __init__(self, model, data, labels, class_index):
@@ -41,11 +42,18 @@ class KNNShapley:
     #     shap_values = s
     #     return shap_values
 
-    def knn_shapley(self, X_test, y_test, X_train, y_train, K):
-        X_test = np.asarray(X_test)
-        y_test = np.asarray(y_test)
+    def knn_shapley(self, x_query, K):
+        # X_test = np.asarray(X_test)
+        # y_test = np.asarray(y_test)
+        # n_test = X_test.shape[0]
+        # N = self.dataset.shape[0]
+        X_test, y_test = x_query
+        y_train = np.asarray(self.labels)
+        X_train = np.asarray(self.dataset)
+        N = X_train.shape[0]
         n_test = X_test.shape[0]
-        N = self.dataset.shape[0]
+
+
         # storage shapley values
         shap_values = np.zeros(N)
         # process each test point

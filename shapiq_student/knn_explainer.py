@@ -40,16 +40,14 @@ class KNNExplainer(Explainer):
             x_query = kwargs["x_query"]
             num_classes = kwargs["num_classes"]
             shapley_values = self.threshold.threshold_knn_shapley(x_query, threshold, num_classes)
-            print("shapley_values:", shapley_values)
-            print(threshold, radius)
-            print(x_query, num_classes)
         elif gamma is not None:
             shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
-            shapley_values = self.knn_shapley.knn_shapley(x, y)
+            x_query = kwargs["x_query"]
+            K = kwargs["K"]
+            shapley_values = self.knn_shapley.knn_shapley(x_query, K)
 
         n_features = x.shape[1] if len(x.shape) > 1 else x.shape[0]
-        print(n_features)
         interaction_values = InteractionValues(
             values=np.array(shapley_values),
             n_players=n_features,
@@ -58,15 +56,5 @@ class KNNExplainer(Explainer):
             index="SV",
             baseline_value=0.0,
         )
-
+        print("shapley_values:", shapley_values)
         return interaction_values
-
-
-    def threshold_knn_shapley(self, x_query, threshold):
-        # TODO Implement theshold
-        pass
-
-
-    def weighted_knn_shapley(self, x_query, gamma):
-        # TODO Implement weighted
-        pass
