@@ -41,7 +41,7 @@ class KNNExplainer(Explainer):
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz 
         #print(f"Anzahl der Datenpunkte im Datensatz: {N}") # Debugging-Ausgabe
-        phi = np.zeros(N+1)
+        phi = np.zeros(N)
 
         # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
@@ -72,6 +72,14 @@ class KNNExplainer(Explainer):
         ranks = np.empty_like(sorted_indices)
         ranks[sorted_indices] = np.arange(len(w_j))
         #print(f"Ranks: {ranks}")  # Debugging-Ausgabe
+
+        helper_array = np.zeros(len(ranks))
+
+        for ind in range(len(ranks)):
+            helper_array[ranks[ind]] = w_j[ind]
+
+        count_zero = np.sum(w_j > 0)
+        #print(f"Anzahl der positiven Werte: {count_zero}")  # Debugging-Ausgabe
 
         for i in range(1, N+ 1):
             # Initialisierung von F als Dictionary
@@ -115,8 +123,14 @@ class KNNExplainer(Explainer):
                     #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
                     #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
                     if Y_sorted[i - 1] == y_val:
-                        for s in range(- ranks[i - 1], - ranks[m - 1]):
-                            R_im[i, m] += F_i.get((t, K - 1, w_k[s]), 0)
+                        count_target_end = np.sum(w_j > - w_j[i - 1])
+                        count_target_start = np.sum(w_j > - w_j[m - 1])
+
+                        for s in range(- count_target_start, - count_target_end):
+                            R_im[i, m] += F_i.get((t, K - 1, helper_array[s]), 0)
+                            #print(- count_target_start, - count_target_end)  # Debugging-Ausgabe
+                            #print(helper_array)
+                            #print(helper_array[s], s)  # Debugging-Ausgabe
                             #print(-ranks[i], -ranks[m])  # Debugging-Ausgabe
                             #if F_i.get((t, K -1, w_k[s]), 0) != 0:
                                 #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, w_k[s]), 0)}")  # Debugging-Ausgabe
@@ -125,15 +139,21 @@ class KNNExplainer(Explainer):
                             #if R_im[i, m] != 0:
                                 #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
                     else:
-                        for s in range(- ranks[m - 1], - ranks[i - 1]):
-                            R_im[i, m] += F_i.get((t, K - 1, w_k[s]), 0)
+                        count_target_end = np.sum(w_j > - w_j[m - 1])
+                        count_target_start = np.sum(w_j > - w_j[i - 1])
+
+                        for s in range(- count_target_start, - count_target_end):
+                            R_im[i, m] += F_i.get((t, K - 1, helper_array[s]), 0)
+                            #print(helper_array[s], s)  # Debugging-Ausgabe
                             #if F_i.get((t, K - 1, w_k[s]), 0) != 0:
                                 #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, w_k[s]), 0)}")  # Debugging-Ausgabe
                             #print(t, K - 1, s)  # Debugging-Ausgabe
-                            #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
+                #if R_im[i, m] != 0:
+                    #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
             G_il = {}
+
             for count in range(1, len(w_i)):
                 #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
                 if w_i_discret[count] < 0:
@@ -144,14 +164,20 @@ class KNNExplainer(Explainer):
                         for m in range(N + 1):
                             if m != i:
                                 if Y_sorted[i - 1] == y_val:
-                                    for s in range(- ranks[i- 1], 0):
-                                        G_il[i, length] += F_i.get((m, length, w_k[s]), 0)
+                                    count_target = np.sum(w_j > - w_j[i - 1])
+                                    for s in range(- count_target, - count_zero):
+                                        G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
                                         #print(f"F_i.get((m, length, s), 0) {F_i.get((m, length, w_k[s]), 0)}")  # Debugging-Ausgabe
                                         #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
+                                        #if G_il[i , length] == 1 or G_il[i, length] == 2 or G_il[i, length] == 3 or G_il[i, length] == 4:
+                                           #print(f"G_il[{i ,length}] = {G_il[i , length]}")  # Debugging-Ausgabe
+
                                 else:
-                                    for s in range(- ranks[i- 1]):
-                                        G_il[i, length] += F_i.get((m, length, w_k[s]), 0)
-                                        #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
+                                    count_target = np.sum(w_j > - w_j[i - 1])
+                                    for s in range(- count_zero, - count_target):
+                                        G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
+                                        #if G_il[i , length] == 1 or G_il[i, length] == 2 or G_il[i, length] == 3 or G_il[i, length] == 4:
+                                           #print(f"G_il[{i ,length}] = {G_il[i , length]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
             sign = []
@@ -161,17 +187,19 @@ class KNNExplainer(Explainer):
             for length in range(K):
                 #print(f"G_il.get(i, {length}) = {G_il.get(i, length)}")  # Debugging-Ausgabe
                 first_term += G_il.get(i, length) / comb(N-1, length - 1)
+                #print(f"G_il.get(i, {length}) = {G_il.get(i, length)}")  # Debugging-Ausgabebe
+                #print(f"{i ,length}] = {i , length}]")  # Debugging-Ausgabe
 
             first_term = (1 / N) * first_term
-            print(f"Erster Term: {first_term}") # Debugging-Ausgabe
+            #print(f"Erster Term [i]: {first_term, i}") # Debugging-Ausgabe
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
                second_term += R_im.get(i, m) / (m * comb(m - 1, K))
                #print(f"R_im.get(i, {m}) = {R_im.get(i, m)}")  # Debugging-Ausgabe
-            print(second_term) # Debugging-Ausgabe
+            #print(second_term) # Debugging-Ausgabe
 
-            phi[i] = sign * (first_term + second_term)
+            phi[i - 1] = sign * (first_term + second_term)
 
             #print(f"Shapley-Wert für den Testpunkt {i + 1} von {len(x_test)}: {phi[i]}") # Debugging-Ausgabe
         return phi
