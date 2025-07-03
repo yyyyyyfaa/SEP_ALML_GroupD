@@ -1,7 +1,16 @@
 import numpy as np
 from shapiq_student.knn_shapley import KNNShapley
 from shapiq import Explainer, InteractionValues
-from scipy.special import comb
+
+from typing import Any
+
+import numpy as np
+from networkx import neighbors
+from shapiq import Explainer, InteractionValues
+
+from shapiq_student.knn_shapley import KNNShapley
+from shapiq_student.threshold import Threshold
+
 
 class KNNExplainer(Explainer):
     def __init__(self,
@@ -20,7 +29,7 @@ class KNNExplainer(Explainer):
             self.class_index = class_index
             self.model_name = model_name
             self.N, self.M = data.shape
-            #self.threshold = Threshold(model, data, labels, class_index)
+            self.threshold = Threshold(model, data, labels, class_index)
             self.knn_shapley = KNNShapley(model, data, labels, class_index)
             self.random_state = np.random.RandomState(random_state)
 
@@ -30,6 +39,7 @@ class KNNExplainer(Explainer):
                 self.mode = 'threshold'
             else:
                 self.mode = 'normal'
+
 
 
     def explain(self, x: np.ndarray | None = None, *args, **kwargs) -> InteractionValues:
@@ -46,8 +56,8 @@ class KNNExplainer(Explainer):
             x_query = kwargs["x_query"]
             K = kwargs["K"]
             shapley_values = self.knn_shapley.knn_shapley(x_query, K)
-
         n_features = x.shape[1] if len(x.shape) > 1 else x.shape[0]
+        print(n_features)
         interaction_values = InteractionValues(
             values=np.array(shapley_values),
             n_players=n_features,
@@ -56,5 +66,5 @@ class KNNExplainer(Explainer):
             index="SV",
             baseline_value=0.0,
         )
-        print("shapley_values:", shapley_values)
+
         return interaction_values
