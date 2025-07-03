@@ -78,7 +78,7 @@ class KNNExplainer(Explainer):
             F_i = {}
             # F als 0 setzen
             for m in range(1, N + 1):
-                for length in range(1, K ):
+                for length in range(1, K):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
 
@@ -100,49 +100,58 @@ class KNNExplainer(Explainer):
 
             # Berechnung von R_0
             R_im = {}
+
             upper = max(i + 1, K + 1)
             #print(f"upper = {upper}")  # Debugging-Ausgabe
             #print(f"N = {N}")  # Debugging-Ausgabe
             #print(F_i)  # Debugging-Ausgabe
             #Berechnung von R_im
             for m in range(upper, N + 1):
+                R_im[i ,m] = 0
                 #print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
                 for t in range(1, m - 1):
-                    for s in w_k:
-                        #print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
-                        #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
-                        #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
-                        #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                        if Y_sorted[i - 1] == y_val:
-                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[i - 1], - ranks[m - 1])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m - 1))
-                            #print(f"s = {s}")  # Debugging-Ausgabe
+                    #print(f"Berechnung von R_im für m={m}, i={i}, t={t}")  # Debugging-Ausgabe
+                    #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
+                    #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
+                    #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                    if Y_sorted[i - 1] == y_val:
+                        for s in range(- ranks[i - 1], - ranks[m - 1]):
+                            R_im[i, m] += F_i.get((t, K - 1, w_k[s]), 0)
                             #print(-ranks[i], -ranks[m])  # Debugging-Ausgabe
-                            #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                            #if F_i.get((t, K -1, w_k[s]), 0) != 0:
+                                #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, w_k[s]), 0)}")  # Debugging-Ausgabe
                             #print(t, K - 1, s)  # Debugging-Ausgabe
                             #print(f"s = {s}")  # Debugging-Ausgabe
-                           # print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
-                        else:
-                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[m - 1], - ranks[i - 1])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m - 1))
-                            #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
+                            #if R_im[i, m] != 0:
+                                #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
+                    else:
+                        for s in range(- ranks[m - 1], - ranks[i - 1]):
+                            R_im[i, m] += F_i.get((t, K - 1, w_k[s]), 0)
+                            #if F_i.get((t, K - 1, w_k[s]), 0) != 0:
+                                #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, w_k[s]), 0)}")  # Debugging-Ausgabe
                             #print(t, K - 1, s)  # Debugging-Ausgabe
                             #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
             G_il = {}
             for count in range(1, len(w_i)):
-                for s in w_k:
-                    #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
-                    if w_i_discret[count] < 0:
-                        G_il[count] = -1
-                    else:
-                        for length in range(1, K):
-                            if Y_sorted[i - 1] == y_val:
-                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N + 1) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i- 1], 0))
-                                    #print(f"F_i.get((m, length, s), 0) {F_i.get((m, length, s), 0)}")  # Debugging-Ausgabe
-                                    #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
-                            else:
-                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N + 1) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i- 1]))
-                                    #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
+                #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
+                if w_i_discret[count] < 0:
+                    G_il[count] = -1
+                else:
+                    for length in range(1, K):
+                        G_il[i, length] = 0
+                        for m in range(N + 1):
+                            if m != i:
+                                if Y_sorted[i - 1] == y_val:
+                                    for s in range(- ranks[i- 1], 0):
+                                        G_il[i, length] += F_i.get((m, length, w_k[s]), 0)
+                                        #print(f"F_i.get((m, length, s), 0) {F_i.get((m, length, w_k[s]), 0)}")  # Debugging-Ausgabe
+                                        #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
+                                else:
+                                    for s in range(- ranks[i- 1]):
+                                        G_il[i, length] += F_i.get((m, length, w_k[s]), 0)
+                                        #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
             sign = []
