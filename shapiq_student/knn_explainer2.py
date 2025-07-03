@@ -41,7 +41,7 @@ class KNNExplainer(Explainer):
         Y = y_train
         N = len(X)  # Menge der Daten im Datensatz 
         #print(f"Anzahl der Datenpunkte im Datensatz: {N}") # Debugging-Ausgabe
-        phi = np.zeros(N)
+        phi = np.zeros(N+1)
 
         # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
@@ -73,26 +73,26 @@ class KNNExplainer(Explainer):
         ranks[sorted_indices] = np.arange(len(w_j))
         #print(f"Ranks: {ranks}")  # Debugging-Ausgabe
 
-        for i in range(1, N):
+        for i in range(1, N+ 1):
             # Initialisierung von F als Dictionary
             F_i = {}
             # F als 0 setzen
-            for m in range(1, N):
-                for length in range(1, K - 1):
+            for m in range(1, N + 1):
+                for length in range(1, K ):
                     for s in w_k:
                         F_i[(m, length, s)] = 0
 
-            for m in range(1, N):
+            for m in range(1, N + 1):
                 if m == i:
                     continue
-                F_i[(m, 1, w_j[m])] = 1
+                F_i[(m, 1, w_j[m - 1])] = 1
                 #print(f"F_i[{m}, {1}, {w_j[m]}] = {F_i[(m, 1, w_j[m])]}")  # Debugging-Ausgabe
                 #print(f"F_i[{m}, 1, {s}] = {F_i[(m, 1, s)]}")  # Debugging-Ausgabe
 
-            for length in range(2, K-1):
-                for m in range (length, N):
+            for length in range(2, K):
+                for m in range (length, N + 1):
                     for s in w_k:
-                        w_m = w_j[m]
+                        w_m = w_j[m - 1]
                         F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
                         #print(f"F_i[{m}, {length}, {s}] = {F_i[(m, length, s)]}")  # Debugging-Ausgabe
                         #print(f"Berechnung von F_i für m={m}, length={length}, s={s}")  # Debugging-Ausgabe
@@ -105,7 +105,7 @@ class KNNExplainer(Explainer):
             #print(f"N = {N}")  # Debugging-Ausgabe
             #print(F_i)  # Debugging-Ausgabe
             #Berechnung von R_im
-            for m in range(upper, N):
+            for m in range(upper, N + 1):
                 #print(f"Berechnung von R_im für m={m}, i={i}")  # Debugging-Ausgabe
                 for t in range(1, m - 1):
                     for s in w_k:
@@ -113,19 +113,19 @@ class KNNExplainer(Explainer):
                         #print(f"Y_sorted[i] = {Y_sorted[i]}, y_val = {y_val}")  # Debugging-Ausgabe#
                         #print(f"w_i_discret[i] = {w_i_discret[i]}, w_j[m] = {w_j[m]}")  # Debugging-Ausgabe
                         #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
-                        if Y_sorted[i] == y_val:
-                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[i], - ranks[m])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m -1))
+                        if Y_sorted[i - 1] == y_val:
+                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[i - 1], - ranks[m - 1])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m - 1))
                             #print(f"s = {s}")  # Debugging-Ausgabe
                             #print(-ranks[i], -ranks[m])  # Debugging-Ausgabe
                             #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
                             #print(t, K - 1, s)  # Debugging-Ausgabe
                             #print(f"s = {s}")  # Debugging-Ausgabe
-                            print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
+                           # print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
                         else:
-                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[m], - ranks[i])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m -1))
+                            R_im[i, m] = sum(F_i.get((t, K - 1, s), 0) for s in range(- ranks[m - 1], - ranks[i - 1])) + sum(F_i.get((t, K - 1, s), 0) for t in range(1, m - 1))
                             #print(f"F_i[t, K - 1, s] = {F_i.get((t, K - 1, s), 0)}")  # Debugging-Ausgabe
                             #print(t, K - 1, s)  # Debugging-Ausgabe
-                            print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
+                            #print(f"R_im[{i, m}] = {R_im[i, m]}")  # Debugging-Ausgabe
 
             # Berechnung von G
             G_il = {}
@@ -135,21 +135,21 @@ class KNNExplainer(Explainer):
                     if w_i_discret[count] < 0:
                         G_il[count] = -1
                     else:
-                        for length in range(1, K - 1):
-                            if Y_sorted[i] == y_val:
-                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i], 0))
+                        for length in range(1, K):
+                            if Y_sorted[i - 1] == y_val:
+                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N + 1) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i- 1], 0))
                                     #print(f"F_i.get((m, length, s), 0) {F_i.get((m, length, s), 0)}")  # Debugging-Ausgabe
                                     #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
                             else:
-                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(0, - ranks[i]))
+                                    G_il[i,length] = sum(F_i.get((m, length, s), 0) for m in range(N + 1) if m != i) + sum(F_i.get((m, length, s), 0) for s in range(- ranks[i- 1]))
                                     #print(f"G_il[{i ,length}] = {G_il[i ,length]}")  # Debugging-Ausgabe
 
             # Berechnung des Shapleys von shapley Values
             sign = []
-            sign = np.sign(w_i_discret[i])
+            sign = np.sign(w_i_discret[i - 1])
 
             first_term = 0
-            for length in range(K - 1):
+            for length in range(K):
                 #print(f"G_il.get(i, {length}) = {G_il.get(i, length)}")  # Debugging-Ausgabe
                 first_term += G_il.get(i, length) / comb(N-1, length)
 
@@ -159,10 +159,10 @@ class KNNExplainer(Explainer):
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
                second_term += R_im.get(i, m) / m * comb(m - 1, K)
-               print(f"R_im.get(i, {m}) = {R_im.get(i, m)}")  # Debugging-Ausgabe
+               #print(f"R_im.get(i, {m}) = {R_im.get(i, m)}")  # Debugging-Ausgabe
             #print(second_term) # Debugging-Ausgabe
 
             phi[i] = sign * (first_term + second_term)
-            
+
             #print(f"Shapley-Wert für den Testpunkt {i + 1} von {len(x_test)}: {phi[i]}") # Debugging-Ausgabe
         return phi
