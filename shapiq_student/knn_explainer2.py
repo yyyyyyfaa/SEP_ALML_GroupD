@@ -178,7 +178,7 @@ class KNNExplainer(Explainer):
 
             # Berechnung des Shapleys von shapley Values
             sign = []
-            sign = np.sign(w_i_discret[i - 1])
+            sign = np.sign(w_j[i - 1])
 
             first_term = 0
             for length in range(K):
