@@ -151,9 +151,9 @@ class KNNExplainer(Explainer):
             # Berechnung von G
             G_il = {}
 
-            for count in range(1, len(w_i)):
+            for count in range(1, len(w_j)):
                 #print(f"w_i[{count}] = {w_i[count]}")  # Debugging-Ausgabe
-                if w_i_discret[count] < 0:
+                if w_j[count] < 0:
                     G_il[count] = -1
                 else:
                     for length in range(1, K):
