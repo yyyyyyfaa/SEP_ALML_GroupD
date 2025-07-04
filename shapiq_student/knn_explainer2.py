@@ -34,8 +34,10 @@ class KNNExplainer(Explainer):
         # if K = null ??
         #print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}") # Debugging-Ausgabe
 
-        X = self.dataset - x_val
-        Y = self.dataset - y_val
+        mask = ~((self.dataset == x_val).all(axis=1) & (self.labels == y_val))
+        X = self.dataset[mask]
+        Y = self.labels[mask]
+
         N = len(X)  # Menge der Daten im Datensatz 
         #print(f"Anzahl der Datenpunkte im Datensatz: {N}") # Debugging-Ausgabe
         phi = np.zeros(N)
