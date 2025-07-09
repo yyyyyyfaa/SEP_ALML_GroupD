@@ -89,11 +89,11 @@ def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set
     Players = set()
     candidates = set(N)
     while len(Players) < length:
-        best_score = -np.inf
+        best_score = np.inf
         best_elem = None
         for i in candidates:
             val = v_hat(Players.union({i}), e_weights, k_max)
-            if val > best_score:
+            if val < best_score:
                 best_score = val
                 best_elem = i
         Players.add(best_elem)
