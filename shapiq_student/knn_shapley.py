@@ -42,16 +42,18 @@ class KNNShapley:
     #     shap_values = s
     #     return shap_values
 
-    def knn_shapley(self, x_query, K):
+    def knn_shapley(self, x):
         # X_test = np.asarray(X_test)
         # y_test = np.asarray(y_test)
         # n_test = X_test.shape[0]
         # N = self.dataset.shape[0]
-        X_test, y_test = x_query
+        X_test = x
+        y_test = [self.class_index]
         y_train = np.asarray(self.labels)
         X_train = np.asarray(self.dataset)
         N = X_train.shape[0]
         n_test = X_test.shape[0]
+        K = 10
 
 
         # storage shapley values
@@ -79,5 +81,20 @@ class KNNShapley:
                 s[cur_idx] = s[nxt_idx] + delta * prob
 
             shap_values += s
-        shap_values /= n_test # divided by the amount of tests values
+        print("shap_values",shap_values)
         return shap_values
+
+    '''
+    shapley/n_test
+    def knn_shapley(self, x):
+
+        X_test = x
+        X_train = np.asarray(self.dataset)
+        N = X_train.shape[0]
+        n_test = X_test.shape[0]
+        sv = np.zeros(N)
+        for i in range(n_test):
+            sv += self.knn_shapley_singel(x[i])
+
+        return sv/n_test
+    '''

@@ -2,6 +2,5 @@
 
 
 
- 
-
+from .knn_explainer import KNNExplainer
 
