@@ -29,7 +29,7 @@ class KNNExplainer(Explainer):
         # TODO Implement theshold
         pass
 
-    def weighted_knn_shapley(self, x_val, y_val, gamma, K):
+    def weighted_knn_shapley(self, x_val: list, y_val: int, gamma: int, K: int):
         # Implement weighted
         # if K = null ??
         #print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}") # Debugging-Ausgabe
