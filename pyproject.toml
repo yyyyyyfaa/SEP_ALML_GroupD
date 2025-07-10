@@ -1,6 +1,6 @@
 # TODO(mmschlk): add your project name and description here
 # uncomment the following line and incpororate the build system
-# [build-system]
+[build-system]
 
 [project]
 name = "shapiq-student"
@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 license = "MIT"
 dependencies = [
     # core dependency
-    "shapiq>=1.2.3",
+    "shapiq==1.3.0",
 ]
 
 
