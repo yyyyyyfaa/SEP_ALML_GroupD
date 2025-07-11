@@ -26,6 +26,7 @@ lint = [
 ]
 docs = [
     # TODO(mmschlk): add your documentation dependencies here
+    "sphinx>=8.2.3"
 ]
 dev = [
     "build>=1.2.2.post1",
