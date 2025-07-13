@@ -6,7 +6,8 @@ import unittest
 
 import numpy as np
 import pytest
-from sep_alml_groupd.knn_explainer2 import weighted_knn_shapley
+
+from shapiq_student.wknn_explainer2 import weighted_knn_shapley
 
 
 class TestWeightedKNN(unittest.TestCase):
