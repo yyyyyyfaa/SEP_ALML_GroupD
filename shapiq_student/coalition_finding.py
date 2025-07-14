@@ -100,7 +100,7 @@ def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set
         candidates.remove(best_elem)
     return Players
 
-def greedy_coalition_finding(N: list, e_weights: dict, k_max: int) -> dict:
+def coalition_finding(N: list, e_weights: dict, k_max: int) -> dict:
     """Find coalitions using a greedy algorithm that maximizes or minimizes a value function.
 
     Parameters

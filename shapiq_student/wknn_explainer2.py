@@ -1,38 +1,20 @@
+from __future__ import annotations
+
+from math import comb
+
 import numpy as np
-from shapiq import Explainer, InteractionValues
+from shapiq import Explainer
 
 
-def factorial(n):
-    if n in {0, 1} or n < 0:
-        return 1
-    return n * factorial(n - 1)
-
-def comb(n, k):
-    if k < 0 or k > n:
-        return 1
-    return factorial(n) // (factorial(k) * factorial(n - k))
-
-class KNNExplainer(Explainer):
+class W_KNNExplainer(Explainer):
     def __init__(
-        self, model, dataset: np.ndarray, labels: np.ndarray, method: str = "standard_shapley"
+        self, dataset: np.ndarray, labels: np.ndarray, method: str = "standard_shapley"
         ):# labels hinzugefügt für WKNN
-        super(KNNExplainer, self).__init__(model, dataset)
         self.dataset = dataset
         self.method = method
         self.labels = labels  # labels hinzugefügt für WKNN
 
-    def knn_shapley(self, x_query):
-        # TODO Implement knn shapley
-        pass
-
-    def threshold_knn_shapley(self, x_query, threshold):
-        # TODO Implement theshold
-        pass
-
     def weighted_knn_shapley(self, x_val: list, y_val: int, gamma: int, K: int):
-        # Implement weighted
-        # if K = null ??
-        #print(f"Berechnung des Shapley-Wertes für den Testpunkt {i + 1} von {len(x_test)}: {x_val}, Label: {y_val}") # Debugging-Ausgabe
 
         mask = ~((self.dataset == x_val).all(axis=1) & (self.labels == y_val))
         X = self.dataset[mask]
