@@ -3,14 +3,15 @@ from math import comb
 import numpy as np
 
 class Threshold:
-    def __init__(self, model, data, labels, class_index):
+    def __init__(self, model, data, labels, class_index, threshold):
         self.model = model
         self.dataset = data
         self.labels = labels
         self.class_index = class_index
+        self.threshold = threshold
 
     def threshold_knn_shapley(
-            self, x_query: tuple[float, float], threshold: float, num_classes: int
+            self, x: tuple[float, float]
     ) -> np.ndarray:
         """Berechnet die Threshold-KNN-Shapey Werte für einen Validierungspunkt.
 
@@ -22,9 +23,14 @@ class Threshold:
         Returns:
             np.ndarry: Ein Array mit den berechneten Spaley-Werten.
         """
-        x_val, y_val = x_query
-        X, y = self.dataset, self.labels
+        x_val = x
+        y_val = self.class_index
+        print(y_val, "y_val")
+        X = self.dataset
+        y = self.labels
         N = self.dataset.shape[0]  # Menge der Trainingspunkte
+        num_classes = len(np.unique(y))
+        print(num_classes)
 
         # Initialisierung
         phi = np.zeros(N)
@@ -37,12 +43,12 @@ class Threshold:
             y_minus_i = np.delete(y, i, axis=0)
 
             distance = np.linalg.norm(x_i - x_val)
-            if distance <= threshold:
+            if distance <= self.threshold:
                 # Grösse des Reduzierten Trainingsdatensatz
                 c = N - 1
 
                 distance_d_minus_zi = np.linalg.norm(X_minus_i - x_val, axis=1)
-                neighbor_indices_minus_zi = np.where(distance_d_minus_zi <= threshold)[0]
+                neighbor_indices_minus_zi = np.where(distance_d_minus_zi <= self.threshold)[0]
 
                 # Anzahl der Nachbarn von x_val in D-zi innerhalb des treshholds
                 c_x = len(neighbor_indices_minus_zi) + 1
