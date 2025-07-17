@@ -1,8 +1,11 @@
+from typing import Any
+
 import numpy as np
+from networkx import neighbors
 from shapiq import Explainer, InteractionValues
 
+#from shapiq_student.threshold import Threshold
 from shapiq_student.knn_shapley import KNNShapley
-
 
 class KNNExplainer(Explainer):
     def __init__(self,
@@ -19,27 +22,28 @@ class KNNExplainer(Explainer):
             self.labels = labels
             self.model_name = model_name
             self.N, self.M = data.shape
-            self.knn_shapley = KNNShapley(model, data, labels, class_index)
+            self.max_order = max_order
+            self.index = index
             self.random_state = np.random.RandomState(random_state)
 
             if hasattr(model, 'weights') and model.weights == 'distance':
                 self.mode = 'weighted'
             elif hasattr(model, 'radius') and model.radius is not None:
                 self.mode = 'threshold'
+                #self.threshold = Threshold(model, data, labels, class_index, model.radius)
             else:
                 self.mode = 'normal'
+                self.knn_shapley = KNNShapley(model, data, labels, class_index)
 
-
-    def explain(self, x: np.ndarray | None = None, *args, **kwargs) -> InteractionValues:
-        radius = kwargs.get("radius")
+    def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         gamma = kwargs.get("gamma")
-        if radius is not None and radius > 0:
-            shapley_values = self.threshold.threshold_knn_shapley(x)
-        elif gamma is not None:
+        if self.mode == "threshold":
+            shapley_values = self.threshold_knn_shapley(x)
+        elif self.mode == 'weighted':
             shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
-            print("Shapley")
             shapley_values = self.knn_shapley.knn_shapley(x)
+
         n_samples = self.dataset.shape[0]
         print(n_samples)
         interaction_values = InteractionValues(
@@ -52,3 +56,9 @@ class KNNExplainer(Explainer):
         )
 
         return interaction_values
+
+
+    def threshold_knn_shapley(self, x: np.ndarray) -> np.ndarray:
+        pass
+    def weighted_knn_shapley(self, x: np.ndarray, gamma: float) -> np.ndarray:
+        pass
