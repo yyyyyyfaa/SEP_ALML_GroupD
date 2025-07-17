@@ -16,12 +16,11 @@ class Threshold:
         """Berechnet die Threshold-KNN-Shapey Werte für einen Validierungspunkt.
 
         Args:
-            x_query : Die Validierungspunkte (x_val, y_val).
-            threshold (float): Der Radius der Nachbarschaft.
-            num_classes (int): Die Anzahl der Klassen von der Klassifizierungsaufgabe.
+            x (tuple[float, float]): Der Radius der Nachbarschaft.
+            y_test (int): Die Anzahl der Klassen von der Klassifizierungsaufgabe.
 
         Returns:
-            np.ndarry: Ein Array mit den berechneten Spaley-Werten.
+            np.ndarry: Ein Array mit den berechneten Saley-Werten.
         """
         x_val = x
         y_val = y_test
@@ -29,7 +28,6 @@ class Threshold:
         y = self.labels
         N = self.dataset.shape[0]  # Menge der Trainingspunkte
         num_classes = len(np.unique(y))
-        print(num_classes)
 
         # Initialisierung
         phi = np.zeros(N)
