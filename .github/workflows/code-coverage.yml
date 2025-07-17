@@ -5,9 +5,14 @@ name: coverage
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
+      - "KNN-Shapley"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "main"
+      - "KNN-Shapley"
+  workflow_dispatch:
 
 permissions:
   contents: read
