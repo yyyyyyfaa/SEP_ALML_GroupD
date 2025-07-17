@@ -10,8 +10,8 @@ class Threshold:
         self.class_index = class_index
         self.threshold = threshold
 
-    def threshold_knn_shapley(
-            self, x: tuple[float, float]
+    def threshold_knn_shapley_single(
+            self, x: tuple[float, float], y_test
     ) -> np.ndarray:
         """Berechnet die Threshold-KNN-Shapey Werte für einen Validierungspunkt.
 
@@ -24,8 +24,7 @@ class Threshold:
             np.ndarry: Ein Array mit den berechneten Spaley-Werten.
         """
         x_val = x
-        y_val = self.class_index
-        print(y_val, "y_val")
+        y_val = y_test
         X = self.dataset
         y = self.labels
         N = self.dataset.shape[0]  # Menge der Trainingspunkte
@@ -38,11 +37,13 @@ class Threshold:
         for i in range(N):
             x_i, y_i = X[i], y[i]
 
+
             # Trainingspunkte i aus den Daten entfernen
             X_minus_i = np.delete(X, i, axis=0)
             y_minus_i = np.delete(y, i, axis=0)
 
             distance = np.linalg.norm(x_i - x_val)
+
             if distance <= self.threshold:
                 # Grösse des Reduzierten Trainingsdatensatz
                 c = N - 1
@@ -78,4 +79,16 @@ class Threshold:
                 else:
                     phi[i] = term2
 
+        return phi
+
+    def threshold_knn_shapley(self, x: tuple[float, float]) -> np.ndarray:
+        y_test = [self.class_index] * len(x)
+        # Make sure it is a scalar
+        y_test = np.asarray(y_test).flatten()
+        X_train = np.asarray(self.dataset)
+        N = X_train.shape[0]
+        n_test = x.shape[0]
+        phi = np.zeros(N)
+        for i in range(n_test):
+            phi += self.threshold_knn_shapley_single(x[i], y_test[i])
         return phi
