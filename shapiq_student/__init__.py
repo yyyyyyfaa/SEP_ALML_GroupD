@@ -2,5 +2,4 @@
 
 
 
-from .knn_explainer import KNNExplainer
-
+from .imputer import GaussianCopulaImputer, GaussianImputer
