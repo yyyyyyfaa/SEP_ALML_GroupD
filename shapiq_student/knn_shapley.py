@@ -16,7 +16,7 @@ class KNNShapley:
         X_train = np.asarray(self.dataset)
         N = X_train.shape[0]
         n_test = X_test.shape[0]
-        K = 10
+        K = getattr(self.model, 'n_neighbors', 10)
 
         # storage shapley values
         shap_values = np.zeros(N)
@@ -41,20 +41,18 @@ class KNNShapley:
                 int(y_train[nxt_idx]== y_test)) / K
             prob = min(K, i + 1) / (i + 1)
             s[cur_idx] = s[nxt_idx] + delta * prob
-            shap_values += s
-            print("shap_values",shap_values)
+
+        shap_values[:] = s
         return shap_values
 
 
 
+
     def knn_shapley(self, X_test):
-        y_test = [self.class_index] * len(X_test)
-        # Make sure it is a scalar
-        y_test = np.asarray(y_test).flatten()
-        X_train = np.asarray(self.dataset)
-        N = X_train.shape[0]
-        n_test = X_test.shape[0]
-        sv = np.zeros(N)
-        for i in range(n_test):
-            sv += self.knn_shapley_single(X_test[i], y_test[i])
-        return sv/n_test
+        X = np.atleast_2d(X_test)
+        n = X.shape[0]
+        sv = np.zeros(np.asarray(self.dataset).shape[0])
+        # Use provided class_index for all test points
+        for x in X:
+            sv += self.knn_shapley_single(x, self.class_index)
+        return sv / n

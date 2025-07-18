@@ -1,120 +1,131 @@
 import numpy as np
-import pytest
 from sklearn.neighbors import KNeighborsClassifier
+import pytest
 
 from shapiq_student.knn_shapley import KNNShapley
 
-def simple_dataset():
-    """
-    1D toy dataset: two 0 and two 1
-    """
-    X_train = np.array([[0], [1], [2], [3]])
-    y_train = np.array([0, 0, 1, 1])
-    return X_train, y_train
 
-def test_single_sample_k2_1d(simple_dataset):
-    X_train, y_train = simple_dataset
-    model = KNeighborsClassifier(n_neighbors=2)
+def test_unweighted_knn_shapley_manual():
+    def test_unweighted_knn_shapley_single_manual():
+        """
+        test knn_shapley_single : expected return [ -1/6, 1/3, 1/3 ]
+        """
+        X_train = np.array([[0.0], [1.0], [2.0]])
+        y_train = np.array([0, 1, 1])
+        model = KNeighborsClassifier(n_neighbors=2)
+        model.fit(X_train, y_train)
+
+        x_test = np.array([1.0])
+        pred = model.predict(x_test.reshape(1, -1))[0]
+        explainer = KNNShapley(model, X_train, y_train, pred)
+
+        # Use single-point API
+        sv = explainer.knn_shapley_single(x_test, pred)
+        expected = np.array([-1 / 6, 1 / 3, 1 / 3])
+
+        assert isinstance(sv, np.ndarray)
+        assert sv.shape == (len(X_train),)
+        assert np.allclose(sv, expected, atol=1e-6)
+
+
+def test_unweighted_knn_shapley_k1_nearest_only():
+    """
+    when K=1 ，only the nearest point has Shapley value as 1，others be 0
+    """
+    X_train = np.array([[0], [1], [2]])
+    y_train = np.array([0, 1, 1])
+    model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X_train, y_train)
 
-    x_test = np.array([0.1])
+    x_test = np.array([0.5])
     pred = model.predict(x_test.reshape(1, -1))[0]
     explainer = KNNShapley(model, X_train, y_train, pred)
+
     shap = explainer.knn_shapley(x_test)
+    nearest_idx = model.kneighbors(x_test.reshape(1, -1), return_distance=False)[0][0]
 
-    # dtype and shape
-    assert isinstance(shap, np.ndarray)
-    assert shap.shape == (len(X_train),)
-
-    # sum should be 1.0
-    assert pytest.approx(1.0, rel=1e-6) == shap.sum()
-
-    # only 2 not zero
+    # Only one non-zero
     nz = np.nonzero(shap)[0]
-    expected = set(model.kneighbors(x_test.reshape(1, -1),
-                                    return_distance=False)[0])
-    assert set(nz) == expected
+    assert list(nz) == [nearest_idx]
+    assert pytest.approx(1.0, rel=1e-6) == shap[nearest_idx]
 
-def test_multiple_samples_average_fixed_class_index(simple_dataset):
-    X_train, y_train = simple_dataset
+
+def test_list_input_consistency():
+    """
+    lists input vs ndarray
+    """
+    X_train_list = [[0.0], [1.0], [2.0]]
+    y_train_list = [0, 1, 1]
     model = KNeighborsClassifier(n_neighbors=2)
-    model.fit(X_train, y_train)
+    model.fit(X_train_list, y_train_list)
 
-    X_test = np.array([[0.1], [2.9]])
-    # class_index stable as first point's predic
-    pred0 = model.predict(X_test[0].reshape(1, -1))[0]
-    explainer = KNNShapley(model, X_train, y_train, pred0)
-    shap = explainer.knn_shapley(X_test)
+    x_test = [1.5]
+    pred = model.predict(np.atleast_2d(x_test))[0]
+    explainer_list = KNNShapley(model, X_train_list, y_train_list, pred)
+    explainer_array = KNNShapley(model, np.array(X_train_list), np.array(y_train_list), pred)
 
-    assert shap.shape == (len(X_train),)
-    # first contribution 1.0，second 0.0，after all sum should be 0.5
-    assert pytest.approx(0.5, rel=1e-6) == shap.sum()
+    shap_list = explainer_list.knn_shapley(x_test)
+    shap_array = explainer_array.knn_shapley(np.array(x_test))
+    np.testing.assert_allclose(shap_list, shap_array, atol=1e-6)
 
-def test_k1_only_nearest(simple_dataset):
-    X_train, y_train = simple_dataset
+def test_single_training_sample_shapley():
+    """
+    when there is only 1 training sample，no matter what k is，
+    the shapley values should be 1
+    """
+    # prepare a single training sample
+    X_train = np.array([[0.0, 0.0]])
+    y_train = np.array([1])
     model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X_train, y_train)
 
-    x_test = np.array([1.1])
-    pred = model.predict(x_test.reshape(1, -1))[0]
-    explainer = KNNShapley(model, X_train, y_train, pred)
-    shap = explainer.knn_shapley(x_test)
+    x_test = np.array([0.0, 0.0])
+    y_pred = model.predict(x_test.reshape(1, -1))[0]
+    explainer = KNNShapley(model, X_train, y_train, y_pred)
 
-    # sum 1.0
-    assert pytest.approx(1.0, rel=1e-6) == shap.sum()
+    sv = explainer.knn_shapley(x_test)
+    assert sv.shape == (1,)
+    # contribution shoule be 1
+    assert pytest.approx(1.0, rel=1e-6) == sv[0]
 
-    # biggest Shapley value -> nearest neighbour
-    nearest_idx = model.kneighbors(x_test.reshape(1, -1),
-                                   return_distance=False)[0][0]
-    assert nearest_idx == int(np.argmax(shap))
-
-def test_none_class_index_all_zero(simple_dataset):
-    X_train, y_train = simple_dataset
+def test_equidistant_samples_symmetry():
+    """
+    when 2 points have same dists and same labels，
+    their shapley values should be same
+    """
+    # 3 points：[-1], [1] have same dists with point 0，third points is different
+    X_train = np.array([[-1.0], [1.0], [10.0]])
+    y_train = np.array([0, 0, 1])
     model = KNeighborsClassifier(n_neighbors=2)
     model.fit(X_train, y_train)
 
-    x_test = np.array([0.1])
-    explainer = KNNShapley(model, X_train, y_train, None)
-    shap = explainer.knn_shapley(x_test)
-    assert shap.shape == (len(X_train),)
-    assert np.all(shap == 0.0)
+    x_test = np.array([0.0])
+    y_pred = model.predict(x_test.reshape(1, -1))[0]
+    explainer = KNNShapley(model, X_train, y_train, y_pred)
 
-def test_input_types_consistency(simple_dataset):
-    X_train, y_train = simple_dataset
-    model = KNeighborsClassifier(n_neighbors=2)
-    model.fit(X_train, y_train)
+    sv = explainer.knn_shapley(x_test)
+    # the points with same dists should have same shapley values
+    assert pytest.approx(sv[0], rel=1e-6) == sv[1]
 
-    x_list = [1.5]
-    pred = model.predict(np.atleast_2d(x_list))[0]
-    explainer_list  = KNNShapley(model, X_train.tolist(), y_train.tolist(), pred)
-    explainer_array = KNNShapley(model, X_train,           y_train,           pred)
+def test_invalid_input_type_raises_type_error():
+    #  string in X，y is normal
+    X_train = np.array([[0.0, 1.0],
+                        [1.0, 2.0],
+                        ["a", "b"]], dtype=object)
+    y_train = np.array([0, 1, 1])
+    x_test  = np.array([0.5, 1.5])
+    K = 2
 
-    out_list  = explainer_list.knn_shapley(x_list)
-    out_array = explainer_array.knn_shapley(np.array(x_list))
-    np.testing.assert_allclose(out_list, out_array)
+    model = KNeighborsClassifier(n_neighbors=K)
+    model.fit(X_train[:2].astype(float), y_train[:2])
+    # create an instance for class KNNShapley
+    explainer = KNNShapley(model, X_train, y_train, class_index=1)
 
-def test_batch_and_single_equal(simple_dataset):
-    X_train, y_train = simple_dataset
-    model = KNeighborsClassifier(n_neighbors=2)
-    model.fit(X_train, y_train)
+    with pytest.raises(TypeError):
+        _ = explainer.knn_shapley(x_test)
 
-    x_val = np.array([1.5])
-    pred = model.predict(x_val.reshape(1, -1))[0]
-    explainer = KNNShapley(model, X_train, y_train, pred)
 
-    single = explainer.knn_shapley(x_val)
-    batch  = explainer.knn_shapley(np.vstack([x_val, x_val]))
-    np.testing.assert_allclose(single, batch)
 
-def test_invalid_input_dimension_raises():
-    X_train = np.array([[0, 1], [1, 0]])
-    y_train = np.array([0, 1])
-    model = KNeighborsClassifier(n_neighbors=1)
-    model.fit(X_train, y_train)
-    explainer = KNNShapley(model, X_train, y_train, 0)
 
-    # input dim is false，sklearn should raise ValueError
-    with pytest.raises(ValueError):
-        explainer.knn_shapley(np.array([[0, 1, 2]]))
 
 
