@@ -27,20 +27,17 @@ class Weighted:
     weighted_knn_shapley(x_val: list, y_val: int, gamma: int, K: int)
         Computes the weighted k-nearest neighbor Shapley values for a given input.
     """
-    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "standard_shapley") -> None:
+    def __init__(self, dataset: np.ndarray, labels: np.ndarray, class_index, weighted) -> None:
         self.dataset = dataset
-        self.method = method
         self.labels = labels
+        self.class_index = class_index
+        self.weighted = weighted
 
     def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Filters the dataset by removing the validation point and computes the distances between the remaining samples and the given validation input.
 
         Parameters
         ----------
-        dataset : np.ndarray
-            The complete dataset as a 2D NumPy array.
-        labels : np.ndarray
-            Array of labels corresponding to the dataset.
         x_val : np.ndarray
             Input sample to validate against.
         y_val : any
@@ -157,7 +154,7 @@ class Weighted:
                     F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
         return F_i
 
-    def compute_r_im(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict, count_zero: int) -> dict:
+    def compute_r_im(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict) -> dict:
         """Computes the R_im values used in the weighted k-nearest neighbor Shapley value calculation.
 
         Parameters
@@ -178,8 +175,6 @@ class Weighted:
             Helper array for weight lookups.
         F_i : dict
             Precomputed F_i values.
-        count_zero : int
-            Count of positive weights.
 
         Returns:
         -------

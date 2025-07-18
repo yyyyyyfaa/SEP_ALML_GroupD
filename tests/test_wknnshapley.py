@@ -15,9 +15,13 @@ class TestWeightedKNN(unittest.TestCase):
 
     def setUp(self):
         """Set up the test fixture with a weighted_knn_shapley model and sample data."""
-        self.model = weighted_knn_shapley()
-        self.model.dataset = np.random.Generator(10, 2)
-        self.model.labels = np.array([0, 1] * 5)
+        dataset = np.random.Generator(10, 2)
+        labels = np.array([0, 1] * 5)
+        class_index = 1
+        weighted = True
+
+        self.model = weighted_knn_shapley(dataset, labels, class_index, weighted)
+
 
     def test_weighted_knn_output_shape(self):
         """Test that the output shape and values of weighted_knn_shapley are as expected."""
