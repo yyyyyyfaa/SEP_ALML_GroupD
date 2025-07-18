@@ -1,4 +1,6 @@
 import numpy as np
+from networkx import neighbors
+
 from shapiq import Explainer, InteractionValues
 
 from shapiq_student.threshold import Threshold
@@ -49,4 +51,9 @@ class KNNExplainer(Explainer):
         )
 
         return interaction_values
+
+
+    def weighted_knn_shapley(self, x_query, gamma):
+        # TODO Implement weighted
+        pass
 
