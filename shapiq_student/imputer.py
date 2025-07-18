@@ -43,6 +43,11 @@ class GaussianImputer(Imputer):
             mu = self.mean
             Sigma = self.CovMatrix
             mu_M = mu[miss_idx]
+            # if no observed features, fallback to unconditional mean
+            if obs_idx.size == 0:
+                X_imp[i, miss_idx] = mu_M
+                continue
+
             mu_O = mu[obs_idx]
             Sigma_OO = Sigma[np.ix_(obs_idx, obs_idx)]
             Sigma_MO = Sigma[np.ix_(miss_idx, obs_idx)]
