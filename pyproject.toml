@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
 include = ["shapiq_student"]
 exclude = ["tests_grading"]
 
@@ -133,3 +133,8 @@ exclude_lines = [
 ]
 
 # TODO(mmschlk): add mypy or ty typing configuration below
+[tool.mypy]
+strict = true
+check_untyped_calls = false
+check_untyped_defs = false
+files = ["shapiq_student", "tests"]
