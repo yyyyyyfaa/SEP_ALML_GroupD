@@ -1,7 +1,6 @@
-from typing import Any
-
 import numpy as np
 from networkx import neighbors
+
 from shapiq import Explainer, InteractionValues
 
 from shapiq_student.threshold import Threshold
@@ -41,11 +40,10 @@ class KNNExplainer(Explainer):
         else:
             shapley_values = self.knn_shapley(x)
 
-        n_features = x.shape[1] if len(x.shape) > 1 else x.shape[0]
-        print(n_features)
+        n_samples = self.dataset.shape[0]
         interaction_values = InteractionValues(
             values=np.array(shapley_values),
-            n_players=n_features,
+            n_players=n_samples,
             min_order=1,
             max_order=1,
             index="SV",
@@ -54,11 +52,8 @@ class KNNExplainer(Explainer):
 
         return interaction_values
 
-    def knn_shapley(self, x_query):
-        # TODO Implement knn shapley
-        pass
-
 
     def weighted_knn_shapley(self, x_query, gamma):
         # TODO Implement weighted
         pass
+
