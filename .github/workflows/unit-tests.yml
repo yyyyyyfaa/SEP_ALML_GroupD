@@ -5,9 +5,9 @@ name: unit-tests
 
 on:
   push:
-    branches: [ "TKNN-Shapley" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "TKNN-Shapley" ]
+    branches: [ "main" ]
 
 jobs:
   build:
