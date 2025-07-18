@@ -32,7 +32,7 @@ class Weighted:
         self.method = method
         self.labels = labels
 
-    def prepare_data(self, dataset: np.ndarray, labels: np.ndarray, x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Filters the dataset by removing the validation point and computes the distances between the remaining samples and the given validation input.
 
         Parameters
