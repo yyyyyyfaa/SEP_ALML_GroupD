@@ -4,8 +4,8 @@ import numpy as np
 from networkx import neighbors
 from shapiq import Explainer, InteractionValues
 
-#from shapiq_student.threshold import Threshold
-from shapiq_student.knn_shapley import KNNShapley
+from shapiq_student.threshold import Threshold
+
 
 class KNNExplainer(Explainer):
     def __init__(self,
@@ -22,33 +22,30 @@ class KNNExplainer(Explainer):
             self.labels = labels
             self.model_name = model_name
             self.N, self.M = data.shape
-            self.max_order = max_order
-            self.index = index
             self.random_state = np.random.RandomState(random_state)
 
             if hasattr(model, 'weights') and model.weights == 'distance':
                 self.mode = 'weighted'
             elif hasattr(model, 'radius') and model.radius is not None:
                 self.mode = 'threshold'
-                #self.threshold = Threshold(model, data, labels, class_index, model.radius)
+                self.threshold = Threshold(model, data, labels, class_index, model.radius)
             else:
                 self.mode = 'normal'
-                self.knn_shapley = KNNShapley(model, data, labels, class_index)
 
     def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         gamma = kwargs.get("gamma")
         if self.mode == "threshold":
-            shapley_values = self.threshold_knn_shapley(x)
+            shapley_values = self.threshold.threshold_knn_shapley(x)
         elif self.mode == 'weighted':
             shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
-            shapley_values = self.knn_shapley.knn_shapley(x)
+            shapley_values = self.knn_shapley(x)
 
-        n_samples = self.dataset.shape[0]
-        print(n_samples)
+        n_features = x.shape[1] if len(x.shape) > 1 else x.shape[0]
+        print(n_features)
         interaction_values = InteractionValues(
             values=np.array(shapley_values),
-            n_players=n_samples,
+            n_players=n_features,
             min_order=1,
             max_order=1,
             index="SV",
@@ -57,8 +54,11 @@ class KNNExplainer(Explainer):
 
         return interaction_values
 
-
-    def threshold_knn_shapley(self, x: np.ndarray) -> np.ndarray:
+    def knn_shapley(self, x_query):
+        # TODO Implement knn shapley
         pass
-    def weighted_knn_shapley(self, x: np.ndarray, gamma: float) -> np.ndarray:
+
+
+    def weighted_knn_shapley(self, x_query, gamma):
+        # TODO Implement weighted
         pass
