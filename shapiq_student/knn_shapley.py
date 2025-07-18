@@ -41,8 +41,7 @@ class KNNShapley:
                 int(y_train[nxt_idx]== y_test)) / K
             prob = min(K, i + 1) / (i + 1)
             s[cur_idx] = s[nxt_idx] + delta * prob
-            shap_values += s
-            print("shap_values",shap_values)
+        shap_values[:] = s
         return shap_values
 
 
