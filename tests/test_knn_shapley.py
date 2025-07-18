@@ -5,27 +5,27 @@ import pytest
 from shapiq_student.knn_shapley import KNNShapley
 
 
-def test_unweighted_knn_shapley_manual():
-    def test_unweighted_knn_shapley_single_manual():
-        """
-        test knn_shapley_single : expected return [ -1/6, 1/3, 1/3 ]
-        """
-        X_train = np.array([[0.0], [1.0], [2.0]])
-        y_train = np.array([0, 1, 1])
-        model = KNeighborsClassifier(n_neighbors=2)
-        model.fit(X_train, y_train)
 
-        x_test = np.array([1.0])
-        pred = model.predict(x_test.reshape(1, -1))[0]
-        explainer = KNNShapley(model, X_train, y_train, pred)
+def test_unweighted_knn_shapley_single_manual():
+    """
+    test knn_shapley_single : expected return [ -1/6, 1/3, 1/3 ]
+    """
+    X_train = np.array([[0.0], [1.0], [2.0]])
+    y_train = np.array([0, 1, 1])
+    model = KNeighborsClassifier(n_neighbors=2)
+    model.fit(X_train, y_train)
 
-        # Use single-point API
-        sv = explainer.knn_shapley_single(x_test, pred)
-        expected = np.array([-1 / 6, 1 / 3, 1 / 3])
+    x_test = np.array([1.0])
+    pred = model.predict(x_test.reshape(1, -1))[0]
+    explainer = KNNShapley(model, X_train, y_train, pred)
 
-        assert isinstance(sv, np.ndarray)
-        assert sv.shape == (len(X_train),)
-        assert np.allclose(sv, expected, atol=1e-6)
+    # Use single-point API
+    sv = explainer.knn_shapley_single(x_test, pred)
+    expected = np.array([-1 / 6, 1 / 3, 1 / 3])
+
+    assert isinstance(sv, np.ndarray)
+    assert sv.shape == (len(X_train),)
+    assert np.allclose(sv, expected, atol=1e-6)
 
 
 def test_unweighted_knn_shapley_k1_nearest_only():

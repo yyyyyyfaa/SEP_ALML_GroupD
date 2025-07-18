@@ -34,9 +34,9 @@ def test_shapley_no_neighbors(data_train, knn_basic):
 # Test one training point in radius
 def test_shapley_with_only_one_neighbor(data_train, knn_basic):
     x_train, y_train = data_train
-    x_query = x_train[0] + 1e-8  # fast identisch
+    x_query = x_train + 1e-8
     threshold = 0.01
-    class_index = y_train[0]
+    class_index = y_train
 
     explainer = Threshold(knn_basic, x_train, y_train, class_index, threshold)
     result = explainer.threshold_knn_shapley(x_query)
