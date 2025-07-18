@@ -1,27 +1,21 @@
-# This workflow will install Python dependencies, run coverage tests with Python 3.11
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
 name: coverage
 
 on:
   push:
-    branches:
-      - "main"
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - "main"
-  workflow_dispatch:
+    branches: [ "main" ]
 
 permissions:
   contents: read
 
 jobs:
-  build:
-
+  coverage:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -36,10 +30,14 @@ jobs:
     - name: Install dependencies
       run: uv sync --all-extras --dev
 
-    - name: Measure coverage
-      run: uv run pytest --cov=shapiq --cov-report=xml -n logical
+    - name: Run tests with coverage (min. 92%)
+      run: |
+        uv run pytest --cov=app \
+                      --cov-report=term-missing \
+                      --cov-report=xml \
+                      --cov-fail-under=92
 
-    - name: Coveralls
+    - name: Upload coverage to Coveralls
       uses: coverallsapp/github-action@v2
       with:
         path-to-lcov: coverage.xml
