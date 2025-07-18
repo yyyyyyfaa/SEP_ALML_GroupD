@@ -120,13 +120,8 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict
     index = interaction_values.index
     n_players = interaction_values.n_players
 
-    #extract players
-    players = sorted({char for coal in index for char in coal})
-
-    #mapping from names to indices and vise verca
-    name_to_index = {name: i for i, name in enumerate(players)}
-    index_to_name = {i: name for name, i in name_to_index.items()}
-
+    players = list(range(n_players))
+    
     #converting weights into dict from frozenset(inices)
     e_weights = {frozenset(coal): value for coal, value in zip(index, weights, strict=False)}
 
@@ -140,8 +135,8 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict
         s_min = greedy_extreme_min(length, N, e_weights, max_size)
 
         #back to String coalitions
-        str_max = "".join(sorted(index_to_name[i] for i in s_max))
-        str_min = "".join(sorted(index_to_name[i] for i in s_min))
+        str_max = tuple(sorted(s_max))
+        str_min = tuple(sorted(s_min))
 
 
         selected_coalitions.add(str_max)
@@ -159,9 +154,11 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict
 
     #filter values
     new_values = []
+    epsilon = 1e-3
+
     for coal in index:
-        if coal in selected_coalitions:
-            value = weights[index.index(coal)]
+        value = e_weights.get(frozenset(coal), 0.0)
+        if (tuple(sorted(coal)) in selected_coalitions) or (abs(value) > epsilon):
             new_values.append(value)
         else:
             new_values.append(0.0)
