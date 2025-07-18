@@ -27,11 +27,14 @@ class Weighted:
     weighted_knn_shapley(x_val: list, y_val: int, gamma: int, K: int)
         Computes the weighted k-nearest neighbor Shapley values for a given input.
     """
-    def __init__(self, dataset: np.ndarray, labels: np.ndarray, class_index, weighted) -> None:
+    """def __init__(self, dataset: np.ndarray, labels: np.ndarray) -> None:
         self.dataset = dataset
-        self.labels = labels
-        self.class_index = class_index
-        self.weighted = weighted
+        self.labels = labels"""
+
+    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "weighted"):# labels hinzugefügt für WKNN
+        self.dataset = dataset
+        self.method = method
+        self.labels = labels  # labels hinzugefügt für WKNN
 
     def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Filters the dataset by removing the validation point and computes the distances between the remaining samples and the given validation input.
@@ -274,7 +277,7 @@ class Weighted:
         np.ndarray
             The computed Shapley values for the input data point.
         """
-        X, Y, sorted_distance = self.prepare_data(self.dataset, self.labels, x_val, y_val)
+        X, Y, sorted_distance = self.prepare_data(x_val, y_val)
 
         N = len(X)  # Menge der Daten im Datensatz
         phi = np.zeros(N)
@@ -291,7 +294,7 @@ class Weighted:
 
         for i in range(1, N+ 1):
             F_i = self.compute_f_i(N, K, w_k, w_j, i)
-            R_im = self.compute_r_im(i, N, K, Y, y_val, w_j, helper_array, F_i, count_zero)
+            R_im = self.compute_r_im(i, N, K, Y, y_val, w_j, helper_array, F_i)
             G_il = self.compute_g_il(i, N, K, Y, y_val, w_j, helper_array, F_i, count_zero)
 
             # Berechnung des Shapleys von shapley Values
@@ -299,9 +302,10 @@ class Weighted:
             sign = np.sign(w_j[i - 1])
 
             first_term = 0
+
             for length in range(K):
 
-                first_term += G_il.get(i, length) / comb(N-1, length - 1)
+                first_term += G_il.get(i, length) / comb(N - 1, length)
 
             first_term = (1 / N) * first_term
 
