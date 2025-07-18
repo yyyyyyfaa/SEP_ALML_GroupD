@@ -50,11 +50,3 @@ class KNNExplainer(Explainer):
 
         return interaction_values
 
-    def knn_shapley(self, x_query):
-        # TODO Implement knn shapley
-        pass
-
-
-    def weighted_knn_shapley(self, x_query, gamma):
-        # TODO Implement weighted
-        pass
