@@ -44,11 +44,9 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
-    index = [(0,), (1,), (2,), (0, 1), (1, 2), (0, 2), (0, 1, 2)]
-    values = [example_weights.get(frozenset(i), 0.0) for i in index]
     iv = InteractionValues(
-        index = index,
-        values = values,
+        index = "all",
+        values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0, 0.0],
         n_players = 3,
         max_order = 2,
         min_order = 1,
@@ -58,11 +56,11 @@ def test_subset_finding(example_weights):
     result = subset_finding(iv, max_size = 2)
 
     assert isinstance(result.values, list)
-    assert len(result.values) == len(index)
+    assert len(result.values) == len(iv.values)
 
-    for idx, val in zip(index, result.values, strict=False):
-        if tuple(sorted(idx)) in [(0,), (1,), (0, 1)]:
-            assert val != 0.0
+    expected_preserved = [0, 1, 3]
+    for i in expected_preserved:
+        assert result.values[i] != 0.0
 
 def test_v_hat_with_empty_players():
     assert v_hat([], {}, 2) == 0.0
@@ -95,8 +93,8 @@ def test_greedy_extreme_min_with_empty_candidates():
 
 def test_subset_finding_with_simple_imput():
     iv = InteractionValues(
-        index = [],
-        values = {},
+        index = "all",
+        values = [],
         n_players = 0,
         max_order = 0,
         min_order = 0,
@@ -107,10 +105,9 @@ def test_subset_finding_with_simple_imput():
     assert result.values == []
 
 def test_subset_finding_with_all_zero_values():
-    index = [(0,), (1,), (0, 1)]
     values = [0.0, 0.0, 0.0]
     iv = InteractionValues(
-        index = index,
+        index = "all",
         values = values,
         n_players = 2,
         max_order = 2,
@@ -121,10 +118,9 @@ def test_subset_finding_with_all_zero_values():
     assert all(val == 0.0 for val in result.values)
 
 def test_subset_finding_with_epsilon_threshold():
-    index = [(0,), (1,), (0, 1)]
     values = [1e-2, 5e-4, 1e-3]
     iv = InteractionValues(
-        index = index,
+        index = "all",
         values = values,
         n_players = 2,
         max_order = 2,
