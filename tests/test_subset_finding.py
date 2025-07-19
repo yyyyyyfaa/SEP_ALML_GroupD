@@ -6,7 +6,7 @@ from itertools import chain, combinations
 
 import numpy as np
 import pytest
-from shapiq.interaction_values import InteractionValues
+from shapiq.interaction_values import InteractionIndex, InteractionValues
 
 from shapiq_student.subset_finding import (
     greedy_extreme_max,
@@ -64,7 +64,7 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
-    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
+    index = InteractionIndex.STII(n_players = 3, max_order = 2, min_order = 1)
     index = frozenset(index)
     iv = InteractionValues(
         index = index,
@@ -122,7 +122,7 @@ def test_greedy_extreme_min_with_empty_candidates():
     assert result == set()
 
 def test_subset_finding_with_all_zero_values():
-    index = generate_interaction_index(n_players = 2, max_order = 2, min_order = 1)
+    index = InteractionIndex.STII(n_players = 2, max_order = 2, min_order = 1)
     index = frozenset(index)
     values = [0.0, 0.0, 0.0]
     iv = InteractionValues(
