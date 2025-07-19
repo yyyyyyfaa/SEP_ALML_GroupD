@@ -281,9 +281,15 @@ class Weighted:
         np.ndarray
             The computed Shapley values for the input data point.
         """
+        if K <= 0:
+            msg = "K must be greater than 0."
+            raise ValueError(msg)
         X, Y, sorted_distance = self.prepare_data(x_val, y_val)
 
         N = len(X)  # Menge der Daten im Datensatz
+        if K > N:
+            msg = "K cannot be greater than number of samples N."
+            raise ValueError(msg)
         phi = np.zeros(N)
 
         w_j, w_k = self.compute_weights(sorted_distance, Y, y_val, gamma, K)
