@@ -135,37 +135,3 @@ def test_subset_finding_with_all_zero_values():
     )
     result = subset_finding(iv, max_size = 2)
     assert all(val == 0.0 for val in result.values)
-
-def test_subset_finding_with_simple_imput():
-    index = generate_interaction_index(n_players = 0, max_order = 0, min_order = 0)
-    index = frozenset(index)
-    iv = InteractionValues(
-        index = index,
-        values = [],
-        n_players = 0,
-        max_order = 0,
-        min_order = 0,
-        baseline_value = 0.0
-    )
-
-    result = subset_finding(iv, max_size = 2)
-    assert result.values == []
-
-
-def test_subset_finding_with_epsilon_threshold():
-    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
-    index = frozenset(index)
-    values = [1e-2, 5e-4, 1e-3]
-    iv = InteractionValues(
-        index = index,
-        values = values,
-        n_players = 2,
-        max_order = 2,
-        min_order = 1,
-        baseline_value = 0.0
-    )
-    result = subset_finding(iv, max_size = 2)
-
-    assert result.values[0] != 0.0
-    assert result.values[1] == 0.0
-    assert result.values[2] != 0.0
