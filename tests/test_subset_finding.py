@@ -68,7 +68,7 @@ def test_subset_finding(example_weights):
     index = frozenset(index)
     iv = InteractionValues(
         index = index,
-        values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0, 0.0],
+        values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0],
         n_players = 3,
         max_order = 2,
         min_order = 1,
