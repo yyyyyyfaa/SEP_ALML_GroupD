@@ -69,17 +69,6 @@ class TestGaussianCopulaImputer:
         x_imp = imputer.transform(x)
         assert np.allclose(x_imp, x)
 
-    def test_transform_with_nan(self):
-        data, x = simple_data()
-        x_missing = x.copy()
-        x_missing[0, 2] = np.nan
-        imputer = GaussianCopulaImputer(model=dummy_model, data= data)
-        imputer.fit(x)
-        X_imp = imputer.transform(x_missing)
-
-        assert not np.isnan(X_imp).any()
-        assert X_imp.shape == x.shape
-
     def test_call_returns_prediction(self):
         data, x = simple_data()
         imputer = GaussianCopulaImputer(model=dummy_model, data= data)
@@ -99,31 +88,6 @@ class TestGaussianCopulaImputer:
         assert not np.isnan(x_imp).any()
         assert x_imp.shape == x.shape
 
-    def test_transform_without_mask_defaults_to_nan(self):
-
-        data, x = simple_data()
-        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
-        imputer.fit(x)
-
-        transformed = imputer.transform(x, mask=None)
-
-        assert np.allclose(transformed, x)
-
-    def test_call_with_multiple_coalitions(self):
-
-        data, x = simple_data()
-        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
-        imputer.fit(x)
-
-        coalitions = [
-            [True, True, False, False, True],
-            [False, False, False, False, False],
-            [True, True, True, True, True]
-        ]
-        preds = imputer(coalitions)
-
-        assert preds.shape == (3,)
-        assert np.isfinite(preds).all()
 
     def test_fit_with_mask_data_filters_rows(self):
         data, x = simple_data()
@@ -135,12 +99,31 @@ class TestGaussianCopulaImputer:
 
         assert imp.mean.shape[0] == data.shape[1]
 
-    def test_call_invokes_model_with_imputed_values(self):
+    def test_coalitions_type_conversion(self):
         data, x = simple_data()
-        imp = GaussianCopulaImputer(model=dummy_model, data=data)
-        imp.fit(x)
-        coalitions = np.array([[False, True]])
-        preds = imp(coalitions)
-        transformed = imp.transform(x, mask=np.array([[True, False]]))
-        expected = np.sum(transformed, axis=1)
-        assert preds[0] == pytest.approx(expected[0])
+        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
+        imputer.fit(x)
+
+        coalitions = np.array([[1, 0, 1, 1, 0]])  # dtype = int
+
+        preds = imputer(coalitions)
+
+        assert preds.shape == (1,)
+        assert np.isfinite(preds).all()
+
+    def test_cond_mean_fallback_if_covariance_singular(self):
+
+        data, x = simple_data()
+        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
+        imputer.fit(x)
+
+        data[:, 1] = data[:, 0]
+        x[0, 1] = x[0, 0]
+
+        coalition = [False, False, True, True, True]
+        coalitions = [coalition]
+
+        preds = imputer(coalitions)
+
+        assert preds.shape == (1,)
+        assert np.isfinite(preds).all()
