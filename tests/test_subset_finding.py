@@ -16,7 +16,7 @@ from shapiq_student.subset_finding import (
 )
 
 
-def generate_interaction_index(n_players: int, max_order: int, min_order: int = 1):
+def generate_interaction_index(n_players: int, max_order: int, min_order: int):
     return list(chain.from_iterable(
         combinations(range(n_players), k)
         for k in range(min_order, max_order + 1)
@@ -64,7 +64,7 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
-    index = generate_interaction_index(n_players = 3, max_order = 2)
+    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
     index = frozenset(index)
     iv = InteractionValues(
         index = index,
@@ -120,3 +120,52 @@ def test_greedy_extreme_min_with_empty_candidates():
     """Test that greedy_extreme_min returns an empty set when candidates list is empty."""
     result = greedy_extreme_min(0, [], {}, 1)
     assert result == set()
+
+def test_subset_finding_with_all_zero_values():
+    index = generate_interaction_index(n_players = 2, max_order = 2, min_order = 1)
+    index = frozenset(index)
+    values = [0.0, 0.0, 0.0]
+    iv = InteractionValues(
+        index = index,
+        values = values,
+        n_players = 2,
+        max_order = 2,
+        min_order = 1,
+        baseline_value = 0.0
+    )
+    result = subset_finding(iv, max_size = 2)
+    assert all(val == 0.0 for val in result.values)
+
+def test_subset_finding_with_simple_imput():
+    index = generate_interaction_index(n_players = 0, max_order = 0, min_order = 0)
+    index = frozenset(index)
+    iv = InteractionValues(
+        index = index,
+        values = [],
+        n_players = 0,
+        max_order = 0,
+        min_order = 0,
+        baseline_value = 0.0
+    )
+
+    result = subset_finding(iv, max_size = 2)
+    assert result.values == []
+
+
+def test_subset_finding_with_epsilon_threshold():
+    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
+    index = frozenset(index)
+    values = [1e-2, 5e-4, 1e-3]
+    iv = InteractionValues(
+        index = index,
+        values = values,
+        n_players = 2,
+        max_order = 2,
+        min_order = 1,
+        baseline_value = 0.0
+    )
+    result = subset_finding(iv, max_size = 2)
+
+    assert result.values[0] != 0.0
+    assert result.values[1] == 0.0
+    assert result.values[2] != 0.0
