@@ -44,8 +44,11 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
-    iv = InteractionValues.from_dict(
-        values = example_weights,
+    index = [(0,), (1,), (2,), (0, 1), (1, 2), (0, 2), (0, 1, 2)]
+    values = [example_weights.get(frozenset(i), 0.0) for i in index]
+    iv = InteractionValues(
+        index = index,
+        values = values,
         n_players = 3,
         max_order = 2,
         min_order = 1,
@@ -55,9 +58,9 @@ def test_subset_finding(example_weights):
     result = subset_finding(iv, max_size = 2)
 
     assert isinstance(result.values, list)
-    assert len(result.values) == len(iv.index)
+    assert len(result.values) == len(index)
 
-    for idx, val in zip(iv.index, result.values, strict=False):
+    for idx, val in zip(index, result.values, strict=False):
         if tuple(sorted(idx)) in [(0,), (1,), (0, 1)]:
             assert val != 0.0
 
@@ -91,7 +94,8 @@ def test_greedy_extreme_min_with_empty_candidates():
     assert result == set()
 
 def test_subset_finding_with_simple_imput():
-    iv = InteractionValues.from_dict(
+    iv = InteractionValues(
+        index = [],
         values = {},
         n_players = 0,
         max_order = 0,
@@ -103,12 +107,11 @@ def test_subset_finding_with_simple_imput():
     assert result.values == []
 
 def test_subset_finding_with_all_zero_values():
-    iv = InteractionValues.from_dict(
-        values = {
-            frozenset([0]): 0.0,
-            frozenset([1]): 0.0,
-            frozenset([0, 1]): 0.0
-        },
+    index = [(0,), (1,), (0, 1)]
+    values = [0.0, 0.0, 0.0]
+    iv = InteractionValues(
+        index = index,
+        values = values,
         n_players = 2,
         max_order = 2,
         min_order = 1,
@@ -118,12 +121,11 @@ def test_subset_finding_with_all_zero_values():
     assert all(val == 0.0 for val in result.values)
 
 def test_subset_finding_with_epsilon_threshold():
-    iv = InteractionValues.from_dict(
-        values = {
-            frozenset([0]): 1e-2,
-            frozenset([1]): 5e-4,
-            frozenset([0, 1]): 1e-3
-        },
+    index = [(0,), (1,), (0, 1)]
+    values = [1e-2, 5e-4, 1e-3]
+    iv = InteractionValues(
+        index = index,
+        values = values,
         n_players = 2,
         max_order = 2,
         min_order = 1,
