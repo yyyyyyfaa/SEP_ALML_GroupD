@@ -2,14 +2,25 @@
 
 from __future__ import annotations
 
+from itertools import chain, combinations
+
 import numpy as np
 import pytest
+from shapiq.interaction_values import InteractionValues
 
 from shapiq_student.subset_finding import (
     greedy_extreme_max,
     greedy_extreme_min,
+    subset_finding,
     v_hat,
 )
+
+
+def generate_interaction_index(n_players: int, max_order: int, min_order: int = 1):
+    return list(chain.from_iterable(
+        combinations(range(n_players), k)
+        for k in range(min_order, max_order + 1)
+    ))
 
 
 @pytest.fixture
@@ -51,6 +62,27 @@ def test_greedy_extreme_min(example_weights):
     k = 2
     assert len(result) == k
     assert k in result #2 has the lowest individual weight
+
+def test_subset_finding(example_weights):
+    index = generate_interaction_index(n_players = 3, max_order = 2)
+    iv = InteractionValues(
+        index = index,
+        values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0, 0.0],
+        n_players = 3,
+        max_order = 2,
+        min_order = 1,
+        baseline_value = 0.0
+    )
+
+    result = subset_finding(iv, max_size = 2)
+
+    assert isinstance(result.values, list)
+    assert len(result.values) == len(iv.values)
+
+    expected_preserved = [0, 1, 3]
+    for i in expected_preserved:
+        assert result.values[i] != 0.0
+
 
 def test_v_hat_with_empty_players():
     """Test v_hat returns 0.0 when given empty players and weights."""
