@@ -10,6 +10,12 @@ from shapiq_student.wknn_explainer2 import Weighted
 
 @pytest.fixture
 def model():
+    """Pytest fixture that creates and returns an instance of the Weighted class.
+
+    Initialized with a dataset of shape (10, 2) filled with ones and corresponding
+    labels as an array of ones (integer type). This fixture can be used in tests
+    that require a pre-defined Weighted model.
+    """
     dataset = np.ones((10, 2))
     labels = np.ones(10, dtype = int)
     return Weighted(dataset, labels)
@@ -66,5 +72,5 @@ def test_weighted_mismatched_dimension(model):
     gamma = 1.0
     K = 2
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input dimension mismatch"):
         model.weighted_knn_shapley(x_val, y_val, gamma, K)

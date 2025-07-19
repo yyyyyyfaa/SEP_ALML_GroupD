@@ -31,7 +31,18 @@ class Weighted:
         self.dataset = dataset
         self.labels = labels"""
 
-    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "weighted"):# labels hinzugefügt für WKNN
+    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "weighted") -> None:
+        """Initialize the Weighted class with a dataset, labels, and computation method.
+
+        Parameters
+        ----------
+        dataset : np.ndarray
+            The dataset to be used for k-nearest neighbor calculations.
+        labels : np.ndarray
+            The labels corresponding to the dataset.
+        method : str, optional
+            The method used for Shapley value computation (default is "weighted").
+        """
         self.dataset = dataset
         self.method = method
         self.labels = labels  # labels hinzugefügt für WKNN
@@ -57,14 +68,10 @@ class Weighted:
         Y = self.labels[mask]
          # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
-        if x_val.shape[0] != self.dataset.shape[1]:
-            msg = "Feature dimension mismatch between x_val and dataset."
-            raise ValueError(msg)
 
         # Sortieren nach Distanz
         sorted_index = np.argsort(distance)  # Indizes für Sortierung
         return X[sorted_index], Y[sorted_index], distance[sorted_index]
-
 
     def compute_weights(
         self,
@@ -281,15 +288,9 @@ class Weighted:
         np.ndarray
             The computed Shapley values for the input data point.
         """
-        if K <= 0:
-            msg = "K must be greater than 0."
-            raise ValueError(msg)
         X, Y, sorted_distance = self.prepare_data(x_val, y_val)
 
         N = len(X)  # Menge der Daten im Datensatz
-        if K > N:
-            msg = "K cannot be greater than number of samples N."
-            raise ValueError(msg)
         phi = np.zeros(N)
 
         w_j, w_k = self.compute_weights(sorted_distance, Y, y_val, gamma, K)
