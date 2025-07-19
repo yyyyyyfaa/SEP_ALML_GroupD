@@ -35,8 +35,9 @@ def test_weighted_knn_zero_distance(model):
     gamma = 1.0
     K = 2
 
-    result = model.weighted_knn_shapley(x_val, y_val, gamma, K)
-    assert result.shape == (0,)
+    #expected behaviour: K greater than N, because all identical Points get removed.
+    with pytest.raises(ValueError, match="K cannot be greater than number of samples N."):
+        model.weighted_knn_shapley(x_val, y_val, gamma, K)
 
 def test_weighted_knn_invalid_K(model):
     """Test that weighted_knn_shapley raises an exception when K is invalid (e.g., zero)."""
