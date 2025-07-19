@@ -1,6 +1,6 @@
 # TODO(mmschlk): add your project name and description here
 # uncomment the following line and incpororate the build system
-# [build-system]
+#[build-system]
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 name = "shapiq-student"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
     # core dependency
@@ -34,6 +34,7 @@ lint = [
 ]
 docs = [
     # TODO(mmschlk): add your documentation dependencies here
+    "sphinx>=8.2.3"
 ]
 dev = [
     "build>=1.2.2.post1",
