@@ -3,6 +3,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import pytest
 
 from shapiq_student.knn_shapley import KNNShapley
+from shapiq_student.knn_explainer import KNNExplainer
 
 
 
@@ -123,6 +124,44 @@ def test_invalid_input_type_raises_type_error():
 
     with pytest.raises(TypeError):
         _ = explainer.knn_shapley(x_test)
+
+def test_unweighted_init_sets_mode_and_attributes():
+    # 构造一个最简单的 1D 数据集
+    X = np.array([[0.], [1.], [2.]])
+    y = np.array([0, 1, 2])
+    model = KNeighborsClassifier(n_neighbors=1)  # weights 默认为 'uniform'
+    model.fit(X, y)
+
+    explainer = KNNExplainer(model=model, data=X, labels=y, model_name="test")
+
+    # __init__ 中 19–32 行
+    assert explainer.dataset is X
+    assert explainer.labels is y
+    assert explainer.model_name == "test"
+    assert (explainer.N, explainer.M) == X.shape
+    # weights != 'distance' 且没有 radius 属性 → mode 应为 'normal'
+    assert explainer.mode == "normal"
+
+def test_explain_wraps_values_and_metadata():
+    X = np.array([[0.], [1.], [2.]])
+    y = np.array([0, 1, 2])
+    model = KNeighborsClassifier(n_neighbors=1)  # uniform weights → mode='normal'
+    model.fit(X, y)
+
+    explainer = KNNExplainer(model=model, data=X, labels=y)
+
+    iv = explainer.explain(np.array([1.0]))
+    # values
+    expected = np.array([0.0, 1.0, 0.0])
+    np.testing.assert_allclose(iv.values, expected, rtol=1e-6)
+    # 其余元数据
+    assert iv.n_players       == 3
+    assert iv.min_order       == 1
+    assert iv.max_order       == 1
+    assert iv.index           == "SV"
+    assert pytest.approx(iv.baseline_value) == 0.0
+
+
 
 
 

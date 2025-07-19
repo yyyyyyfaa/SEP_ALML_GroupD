@@ -4,6 +4,7 @@ from networkx import neighbors
 from shapiq import Explainer, InteractionValues
 
 from shapiq_student.threshold import Threshold
+from .knn_shapley import KNNShapley
 
 
 class KNNExplainer(Explainer):
@@ -29,6 +30,7 @@ class KNNExplainer(Explainer):
                 self.mode = 'threshold'
                 self.threshold = Threshold(model, data, labels, class_index, model.radius)
             else:
+                # normal 模式：先预测，再调用 knn_shapley
                 self.mode = 'normal'
 
     def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
@@ -52,7 +54,16 @@ class KNNExplainer(Explainer):
 
         return interaction_values
 
+    def knn_shapley(self, x_query: np.ndarray) -> np.ndarray:
+        Xq = np.atleast_2d(x_query)
+        y_pred = self.model.predict(Xq)[0]
 
+        ks = KNNShapley(self.model,
+                        self.dataset,
+                        self.labels,
+                        y_pred)
+
+        return ks.knn_shapley(x_query)
     def weighted_knn_shapley(self, x_query, gamma):
         # TODO Implement weighted
         pass
