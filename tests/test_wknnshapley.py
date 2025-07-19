@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from shapiq_student.wknn_explainer2 import Weighted
+from shapiq_student.wknn_explainer import Weighted
 
 
 @pytest.fixture

@@ -4,9 +4,9 @@ name: Install & Import shapiq_student
 
 on:
   push:
-    branches: [main, WKNN-Shapley]
+    branches: [main]
   pull_request:
-    branches: [main, WKNN-Shapley]
+    branches: [main]
 
 jobs:
   install-and-import:

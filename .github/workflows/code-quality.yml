@@ -8,7 +8,7 @@ on:
       - "*"
   push:
     branches:
-      - WKNN-Shapley
+      - main
 
 jobs:
   build:

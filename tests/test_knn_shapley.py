@@ -1,16 +1,21 @@
+"""Unit tests for KNN Shapley and KNN Explainer functionality.
+
+This module contains tests for the KNNShapley and KNNExplainer classes,
+verifying correctness of Shapley value computations and API consistency.
+"""
+
+from __future__ import annotations
+
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
 import pytest
+from sklearn.neighbors import KNeighborsClassifier
 
-from shapiq_student.knn_shapley import KNNShapley
 from shapiq_student.knn_explainer import KNNExplainer
-
+from shapiq_student.knn_shapley import KNNShapley
 
 
 def test_unweighted_knn_shapley_single_manual():
-    """
-    test knn_shapley_single : expected return [ -1/6, 1/3, 1/3 ]
-    """
+    """Test knn_shapley_single : expected return [ -1/6, 1/3, 1/3 ]."""
     X_train = np.array([[0.0], [1.0], [2.0]])
     y_train = np.array([0, 1, 1])
     model = KNeighborsClassifier(n_neighbors=2)
@@ -30,9 +35,7 @@ def test_unweighted_knn_shapley_single_manual():
 
 
 def test_unweighted_knn_shapley_k1_nearest_only():
-    """
-    when K=1 ，only the nearest point has Shapley value as 1，others be 0
-    """
+    """When K=1, only the nearest point has Shapley value as 1, others be 0."""
     X_train = np.array([[0], [1], [2]])
     y_train = np.array([0, 1, 1])
     model = KNeighborsClassifier(n_neighbors=1)
@@ -52,9 +55,7 @@ def test_unweighted_knn_shapley_k1_nearest_only():
 
 
 def test_list_input_consistency():
-    """
-    lists input vs ndarray
-    """
+    """Lists input vs ndarray."""
     X_train_list = [[0.0], [1.0], [2.0]]
     y_train_list = [0, 1, 1]
     model = KNeighborsClassifier(n_neighbors=2)
@@ -70,9 +71,9 @@ def test_list_input_consistency():
     np.testing.assert_allclose(shap_list, shap_array, atol=1e-6)
 
 def test_single_training_sample_shapley():
-    """
-    when there is only 1 training sample，no matter what k is，
-    the shapley values should be 1
+    """When there is only 1 training sample, no matter what k is,.
+
+    the shapley values should be 1.
     """
     # prepare a single training sample
     X_train = np.array([[0.0, 0.0]])
@@ -90,9 +91,9 @@ def test_single_training_sample_shapley():
     assert pytest.approx(1.0, rel=1e-6) == sv[0]
 
 def test_equidistant_samples_symmetry():
-    """
-    when 2 points have same dists and same labels，
-    their shapley values should be same
+    """When 2 points have same dists and same labels,.
+
+    their shapley values should be same.
     """
     # 3 points：[-1], [1] have same dists with point 0，third points is different
     X_train = np.array([[-1.0], [1.0], [10.0]])
@@ -109,6 +110,7 @@ def test_equidistant_samples_symmetry():
     assert pytest.approx(sv[0], rel=1e-6) == sv[1]
 
 def test_invalid_input_type_raises_type_error():
+    """Test that TypeError is raised when X contains invalid (non-numeric) input types."""
     #  string in X，y is normal
     X_train = np.array([[0.0, 1.0],
                         [1.0, 2.0],
@@ -126,23 +128,23 @@ def test_invalid_input_type_raises_type_error():
         _ = explainer.knn_shapley(x_test)
 
 def test_unweighted_init_sets_mode_and_attributes():
-    # 构造一个最简单的 1D 数据集
+    """Test that KNNExplainer initializes mode and attributes correctly for unweighted KNN."""
     X = np.array([[0.], [1.], [2.]])
     y = np.array([0, 1, 2])
-    model = KNeighborsClassifier(n_neighbors=1)  # weights 默认为 'uniform'
+    model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X, y)
 
     explainer = KNNExplainer(model=model, data=X, labels=y, model_name="test")
 
-    # __init__ 中 19–32 行
+
     assert explainer.dataset is X
     assert explainer.labels is y
     assert explainer.model_name == "test"
     assert (explainer.N, explainer.M) == X.shape
-    # weights != 'distance' 且没有 radius 属性 → mode 应为 'normal'
     assert explainer.mode == "normal"
 
 def test_explain_wraps_values_and_metadata():
+    """Test that KNNExplainer.explain returns correct values and metadata."""
     X = np.array([[0.], [1.], [2.]])
     y = np.array([0, 1, 2])
     model = KNeighborsClassifier(n_neighbors=1)  # uniform weights → mode='normal'
@@ -154,8 +156,8 @@ def test_explain_wraps_values_and_metadata():
     # values
     expected = np.array([0.0, 1.0, 0.0])
     np.testing.assert_allclose(iv.values, expected, rtol=1e-6)
-    # 其余元数据
-    assert iv.n_players       == 3
+    N_PLAYERS = 3
+    assert iv.n_players       == N_PLAYERS
     assert iv.min_order       == 1
     assert iv.max_order       == 1
     assert iv.index           == "SV"
