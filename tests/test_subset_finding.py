@@ -17,6 +17,22 @@ from shapiq_student.subset_finding import (
 
 
 def generate_interaction_index(n_players: int, max_order: int, min_order: int):
+    """Generate all possible interaction indices (subsets) for a given number of players and order range.
+
+    Parameters
+    ----------
+    n_players : int
+        The total number of players.
+    max_order : int
+        The maximum size of the subsets (order).
+    min_order : int
+        The minimum size of the subsets (order).
+
+    Returns:
+    -------
+    list
+        A list of tuples, each representing a subset of player indices.
+    """
     return list(chain.from_iterable(
         combinations(range(n_players), k)
         for k in range(min_order, max_order + 1)
@@ -64,6 +80,7 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
+    """Test the subset_finding function to ensure it preserves expected values and output shape."""
     index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
     index = frozenset(index)
     iv = InteractionValues(
@@ -122,6 +139,7 @@ def test_greedy_extreme_min_with_empty_candidates():
     assert result == set()
 
 def test_subset_finding_with_all_zero_values():
+    """Test that subset_finding returns all zero values when input values are all zero."""
     index = generate_interaction_index(n_players = 2, max_order = 2, min_order = 1)
     index = frozenset(index)
     values = [0.0, 0.0, 0.0]
@@ -137,6 +155,7 @@ def test_subset_finding_with_all_zero_values():
     assert all(val == 0.0 for val in result.values)
 
 def test_subset_finding_with_simple_imput():
+    """Test that subset_finding returns the correct result for empty input."""
     index = generate_interaction_index(n_players = 0, max_order = 0, min_order = 0)
     index = frozenset(index)
     iv = InteractionValues(

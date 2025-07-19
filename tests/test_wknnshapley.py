@@ -86,7 +86,8 @@ def test_prepare_data_removal_and_sorting():
     X_filtered, Y_filterd, sorted_distances = model.prepare_data(x_val, y_val)
 
     #point [1, 1] with label 0 should be removed
-    assert X_filtered.shape[0] == 2
+    EXPECTED_FILTERED_SHAPE = 2
+    assert X_filtered.shape[0] == EXPECTED_FILTERED_SHAPE
     assert not np.any((X_filtered == [1, 1]).all(axis = 1))
 
     #test distancesort
