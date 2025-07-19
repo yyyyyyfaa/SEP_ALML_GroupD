@@ -1,9 +1,46 @@
+"""This module provides the Threshold class for calculating threshold-based KNN Shapley values."""
+
+from __future__ import annotations
+
 from math import comb
 
 import numpy as np
 
+
 class Threshold:
-    def __init__(self, model, data, labels, class_index, threshold):
+    """A class for calculating threshold-based KNN Shapley values.
+
+    Attributes:
+    ----------
+    model : object
+        The machine learning model used for predictions.
+    data : np.ndarray
+        The training dataset.
+    labels : np.ndarray
+        The labels corresponding to the training data.
+    class_index : int
+        The index of the class for which Shapley values are calculated.
+    threshold : float
+        The distance threshold for considering neighbors.
+
+    Methods:
+    -------
+    threshold_knn_shapley_single(x, y_test)
+        Calculates the threshold-KNN Shapley values for a single validation point.
+    threshold_knn_shapley(x)
+        Calculates the threshold-KNN Shapley values for multiple validation points.
+    """
+
+    def __init__(self, model, data, labels, class_index, threshold) -> None:
+        """Initialize the Threshold class with model, data, labels, class index, and threshold.
+
+        Args:
+            model: The machine learning model used for predictions.
+            data: The training dataset.
+            labels: The labels corresponding to the training data.
+            class_index: The index of the class for which Shapley values are calculated.
+            threshold: The distance threshold for considering neighbors.
+        """
         self.model = model
         self.dataset = data
         self.labels = labels
@@ -80,6 +117,14 @@ class Threshold:
         return phi
 
     def threshold_knn_shapley(self, x: tuple[float, float]) -> np.ndarray:
+        """Calculates the threshold-KNN Shapley values for multiple validation points.
+
+        Args:
+            x (tuple[float, float]): Array of validation points for which to calculate Shapley values.
+
+        Returns:
+            np.ndarray: Array containing the aggregated Shapley values for the training data.
+        """
         y_test = [self.class_index] * len(x)
         # Make sure it is a scalar
         y_test = np.asarray(y_test).flatten()
