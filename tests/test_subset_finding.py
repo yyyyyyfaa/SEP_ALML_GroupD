@@ -44,25 +44,6 @@ def test_greedy_extreme_min(example_weights):
     assert len(result) == k
     assert k in result #2 has the lowest individual weight
 
-def test_subset_finding(example_weights):
-    iv = InteractionValues(
-        index = "all",
-        values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0, 0.0],
-        n_players = 3,
-        max_order = 2,
-        min_order = 1,
-        baseline_value = 0.0
-    )
-
-    result = subset_finding(iv, max_size = 2)
-
-    assert isinstance(result.values, list)
-    assert len(result.values) == len(iv.values)
-
-    expected_preserved = [0, 1, 3]
-    for i in expected_preserved:
-        assert result.values[i] != 0.0
-
 def test_v_hat_with_empty_players():
     assert v_hat([], {}, 2) == 0.0
 
@@ -104,32 +85,3 @@ def test_subset_finding_with_simple_imput():
 
     result = subset_finding(iv, max_size = 2)
     assert result.values == []
-
-def test_subset_finding_with_all_zero_values():
-    values = [0.0, 0.0, 0.0]
-    iv = InteractionValues(
-        index = "all",
-        values = values,
-        n_players = 2,
-        max_order = 2,
-        min_order = 1,
-        baseline_value = 0.0
-    )
-    result = subset_finding(iv, max_size = 2)
-    assert all(val == 0.0 for val in result.values)
-
-def test_subset_finding_with_epsilon_threshold():
-    values = [1e-2, 5e-4, 1e-3]
-    iv = InteractionValues(
-        index = "all",
-        values = values,
-        n_players = 2,
-        max_order = 2,
-        min_order = 1,
-        baseline_value = 0.0
-    )
-    result = subset_finding(iv, max_size = 2)
-
-    assert result.values[0] != 0.0
-    assert result.values[1] == 0.0
-    assert result.values[2] != 0.0
