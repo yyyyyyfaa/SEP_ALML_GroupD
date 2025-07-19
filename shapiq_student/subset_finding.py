@@ -54,6 +54,9 @@ def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set
     set
         Set of players forming the coalition with the maximum value.
     """
+    if length > len(N):
+        msg = "Requested coalition length exceeds number of players"
+        raise ValueError(msg)
     Players = set()
     candidates = set(N)
     while len(Players) < length:
