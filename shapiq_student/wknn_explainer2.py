@@ -68,6 +68,9 @@ class Weighted:
         Y = self.labels[mask]
          # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
+        if x_val.shape[0] != self.dataset.shape[1]:
+            msg = "Feature dimension mismatch between x_val and dataset."
+            raise ValueError(msg)
 
         # Sortieren nach Distanz
         sorted_index = np.argsort(distance)  # Indizes für Sortierung
@@ -288,9 +291,19 @@ class Weighted:
         np.ndarray
             The computed Shapley values for the input data point.
         """
+        if K <= 0:
+            msg = "K must be greater than 0."
+            raise ValueError(msg)
         X, Y, sorted_distance = self.prepare_data(x_val, y_val)
 
         N = len(X)  # Menge der Daten im Datensatz
+        if N == 0:
+            msg = "No samples remaining after filtering. Cannot compute Shapley values."
+            raise ValueError(msg)
+
+        if K > N:
+            msg = "K cannot be greater than number of samples N."
+            raise ValueError(msg)
         phi = np.zeros(N)
 
         w_j, w_k = self.compute_weights(sorted_distance, Y, y_val, gamma, K)

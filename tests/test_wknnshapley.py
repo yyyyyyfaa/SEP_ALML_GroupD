@@ -41,8 +41,7 @@ def test_weighted_knn_zero_distance(model):
     gamma = 1.0
     K = 2
 
-    #expected behaviour: K greater than N, because all identical Points get removed.
-    with pytest.raises(ValueError, match="K cannot be greater than number of samples N."):
+    with pytest.raises(ValueError, match="No samples remaining after filtering. Cannot compute Shapley values."):
         model.weighted_knn_shapley(x_val, y_val, gamma, K)
 
 def test_weighted_knn_invalid_K(model):
