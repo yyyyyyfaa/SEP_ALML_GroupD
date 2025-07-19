@@ -6,7 +6,7 @@ from itertools import chain, combinations
 
 import numpy as np
 import pytest
-from shapiq.interaction_values import InteractionIndex, InteractionValues
+from shapiq.interaction_values import InteractionValues
 
 from shapiq_student.subset_finding import (
     greedy_extreme_max,
@@ -64,7 +64,7 @@ def test_greedy_extreme_min(example_weights):
     assert k in result #2 has the lowest individual weight
 
 def test_subset_finding(example_weights):
-    index = InteractionIndex.STII(n_players = 3, max_order = 2, min_order = 1)
+    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
     index = frozenset(index)
     iv = InteractionValues(
         index = index,
@@ -122,7 +122,7 @@ def test_greedy_extreme_min_with_empty_candidates():
     assert result == set()
 
 def test_subset_finding_with_all_zero_values():
-    index = InteractionIndex.STII(n_players = 2, max_order = 2, min_order = 1)
+    index = generate_interaction_index(n_players = 2, max_order = 2, min_order = 1)
     index = frozenset(index)
     values = [0.0, 0.0, 0.0]
     iv = InteractionValues(
@@ -135,3 +135,38 @@ def test_subset_finding_with_all_zero_values():
     )
     result = subset_finding(iv, max_size = 2)
     assert all(val == 0.0 for val in result.values)
+
+def test_subset_finding_with_simple_imput():
+    index = generate_interaction_index(n_players = 0, max_order = 0, min_order = 0)
+    index = frozenset(index)
+    iv = InteractionValues(
+        index = index,
+        values = [],
+        n_players = 0,
+        max_order = 0,
+        min_order = 0,
+        baseline_value = 0.0
+    )
+
+    result = subset_finding(iv, max_size = 2)
+    assert len(result.values) == 1
+    assert result.values[0] == 0.0
+
+
+def test_subset_finding_with_epsilon_threshold():
+    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
+    index = frozenset(index)
+    values = [1e-2, 5e-4, 1e-3, 0.0, 0.0, 0.0]
+    iv = InteractionValues(
+        index = index,
+        values = values,
+        n_players = 2,
+        max_order = 2,
+        min_order = 1,
+        baseline_value = 0.0
+    )
+    result = subset_finding(iv, max_size = 2)
+
+    assert result.values[0] != 0.0
+    assert result.values[1] == 0.0
+    assert result.values[2] != 0.0
