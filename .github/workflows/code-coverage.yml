@@ -32,12 +32,12 @@ jobs:
 
     - name: Run tests with coverage (min. 92%)
       run: |
-        uv run pytest --cov=app \
+        uv run pytest --cov=shapiq_student \
                       --cov-report=term-missing \
                       --cov-report=xml \
                       --cov-fail-under=92
 
-    - name: Upload coverage to Coveralls
+    - name: Coveralls
       uses: coverallsapp/github-action@v2
       with:
         path-to-lcov: coverage.xml
