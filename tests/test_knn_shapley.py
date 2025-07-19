@@ -140,6 +140,7 @@ def test_unweighted_init_sets_mode_and_attributes():
     assert explainer.dataset is X
     assert explainer.labels is y
     assert explainer.model_name == "test"
+    # remove klammern
     assert explainer.N == X.shape[0]
     assert explainer.M == X.shape[1]
     assert explainer.mode == "normal"
