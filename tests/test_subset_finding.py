@@ -65,6 +65,7 @@ def test_greedy_extreme_min(example_weights):
 
 def test_subset_finding(example_weights):
     index = generate_interaction_index(n_players = 3, max_order = 2)
+    index = frozenset(index)
     iv = InteractionValues(
         index = index,
         values = [1.0, 2.0, -1.0, 3.0, 0.0, 0.0, 0.0],
