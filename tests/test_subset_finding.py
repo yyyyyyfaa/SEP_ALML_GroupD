@@ -33,7 +33,8 @@ def test_v_hat(example_weights):
 def test_greedy_extreme_max(example_weights):
     N = [0, 1, 2]
     result = greedy_extreme_max(2, N, example_weights, k_max = 2)
-    assert len(result) == 2
+    k = 2
+    assert len(result) == k
     assert 1 in result #1 has the highest individual weight
 
 def test_greedy_extreme_min(example_weights):
