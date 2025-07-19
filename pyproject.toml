@@ -1,8 +1,10 @@
 # TODO(mmschlk): add your project name and description here
 # uncomment the following line and incpororate the build system
+#[build-system]
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
 
 [project]
 name = "shapiq-student"
@@ -12,14 +14,13 @@ requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
     # core dependency
-    "shapiq==1.3.0",
+    "shapiq>=1.3.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["shapiq_student"]
 exclude = ["tests_grading"]
-
 
 [dependency-groups]
 test = [
@@ -133,3 +134,8 @@ exclude_lines = [
 ]
 
 # TODO(mmschlk): add mypy or ty typing configuration below
+[tool.mypy]
+strict = true
+check_untyped_calls = false
+check_untyped_defs = false
+files = ["shapiq_student", "tests"]
