@@ -73,3 +73,25 @@ def test_weighted_mismatched_dimension(model):
 
     with pytest.raises(ValueError, match="Feature dimension mismatch between x_val and dataset."):
         model.weighted_knn_shapley(x_val, y_val, gamma, K)
+
+def test_prepare_data_removal_and_sorting():
+    """Test that prepare_data correctly removes(x_val, y_val) and sorts by distance."""
+    dataset = np.array([[0, 0], [1, 1], [2, 2]])
+    labels = np.array([1, 0, 1])
+    model = Weighted(dataset, labels)
+
+    x_val = np.array([1, 1])
+    y_val = 0
+
+    X_filtered, Y_filterd, sorted_distances = model.prepare_data(x_val, y_val)
+
+    #point [1, 1] with label 0 should be removed
+    assert X_filtered.shape[0] == 2
+    assert not np.any((X_filtered == [1, 1]).all(axis = 1))
+
+    #test distancesort
+    assert np.allclose(sorted_distances, sorted(sorted_distances))
+
+    #labels have to fit to the filtered X
+    assert Y_filterd.shape == (2,)
+    assert np.array_equal(Y_filterd, [1, 1])

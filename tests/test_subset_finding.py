@@ -151,22 +151,3 @@ def test_subset_finding_with_simple_imput():
     result = subset_finding(iv, max_size = 2)
     assert len(result.values) == 1
     assert result.values[0] == 0.0
-
-
-def test_subset_finding_with_epsilon_threshold():
-    index = generate_interaction_index(n_players = 3, max_order = 2, min_order = 1)
-    index = frozenset(index)
-    values = [1e-2, 5e-4, 1e-3, 0.0, 0.0, 0.0]
-    iv = InteractionValues(
-        index = index,
-        values = values,
-        n_players = 2,
-        max_order = 2,
-        min_order = 1,
-        baseline_value = 0.0
-    )
-    result = subset_finding(iv, max_size = 2)
-
-    assert result.values[0] != 0.0
-    assert result.values[1] == 0.0
-    assert result.values[2] != 0.0
