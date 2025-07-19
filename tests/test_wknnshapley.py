@@ -8,6 +8,7 @@ import pytest
 from shapiq_student.wknn_explainer2 import Weighted
 
 
+@pytest.fixture
 def model():
     model = Weighted()
     model.dataset = np.ones((10, 2))
