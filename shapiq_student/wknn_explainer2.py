@@ -57,10 +57,14 @@ class Weighted:
         Y = self.labels[mask]
          # Berechnung der distanz
         distance = np.linalg.norm(X - x_val, axis=1)
+        if x_val.shape[0] != self.dataset.shape[1]:
+            msg = "Feature dimension mismatch between x_val and dataset."
+            raise ValueError(msg)
 
         # Sortieren nach Distanz
         sorted_index = np.argsort(distance)  # Indizes für Sortierung
         return X[sorted_index], Y[sorted_index], distance[sorted_index]
+
 
     def compute_weights(
         self,
