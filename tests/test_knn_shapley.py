@@ -16,12 +16,12 @@ def test_unweighted_knn_shapley_single_manual():
     model.fit(X_train, y_train)
 
     x_test = np.array([1.0])
-    pred = model.predict(x_test.reshape(1, -1))[0]
+    pred = 1
     explainer = KNNShapley(model, X_train, y_train, pred)
 
     # Use single-point API
     sv = explainer.knn_shapley_single(x_test, pred)
-    expected = np.array([-1 / 6, 1 / 3, 1 / 3])
+    expected = np.array([-1/6, 1/3, 1/3])
 
     assert isinstance(sv, np.ndarray)
     assert sv.shape == (len(X_train),)
@@ -123,6 +123,8 @@ def test_invalid_input_type_raises_type_error():
 
     with pytest.raises(TypeError):
         _ = explainer.knn_shapley(x_test)
+
+
 
 
 
