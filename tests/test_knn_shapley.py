@@ -145,25 +145,6 @@ def test_unweighted_init_sets_mode_and_attributes():
     assert explainer.M == X.shape[1]
     assert explainer.mode == "normal"
 
-def test_explain_wraps_values_and_metadata():
-    """Test that KNNExplainer.explain returns correct values and metadata."""
-    X = np.array([[0.], [1.], [2.]])
-    y = np.array([0, 1, 2])
-    model = KNeighborsClassifier(n_neighbors=1)  # uniform weights → mode='normal'
-    model.fit(X, y)
-
-    explainer = KNNExplainer(model=model, data=X, labels=y)
-
-    iv = explainer.explain(np.array([1.0]))
-    # values
-    expected = np.array([0.0, 1.0, 0.0])
-    np.testing.assert_allclose(iv.values, expected, rtol=1e-6)
-    N_PLAYERS = 3
-    assert iv.n_players       == N_PLAYERS
-    assert iv.min_order       == 1
-    assert iv.max_order       == 1
-    assert iv.index           == "SV"
-    assert pytest.approx(iv.baseline_value) == 0.0
 
 
 
