@@ -71,5 +71,5 @@ def test_weighted_mismatched_dimension(model):
     gamma = 1.0
     K = 2
 
-    with pytest.raises(ValueError, match="Input dimension mismatch"):
+    with pytest.raises(ValueError, match="Feature dimension mismatch between x_val and dataset."):
         model.weighted_knn_shapley(x_val, y_val, gamma, K)
