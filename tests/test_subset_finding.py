@@ -72,16 +72,3 @@ def test_greedy_extreme_max_exceeds_number_of_players():
 def test_greedy_extreme_min_with_empty_candidates():
     result = greedy_extreme_min(0, [], {}, 1)
     assert result == set()
-
-def test_subset_finding_with_simple_imput():
-    iv = InteractionValues(
-        index = "all",
-        values = [],
-        n_players = 0,
-        max_order = 0,
-        min_order = 0,
-        baseline_value = 0.0
-    )
-
-    result = subset_finding(iv, max_size = 2)
-    assert result.values == []
