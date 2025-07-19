@@ -10,10 +10,9 @@ from shapiq_student.wknn_explainer2 import Weighted
 
 @pytest.fixture
 def model():
-    model = Weighted()
-    model.dataset = np.ones((10, 2))
-    model.labels = np.ones(10, dtype = int)
-    return model
+    dataset = np.ones((10, 2))
+    labels = np.ones(10, dtype = int)
+    return Weighted(dataset, labels)
 
 def test_weighted_knn_output_shape(model):
     """Test that the output shape and values of weighted_knn_shapley are as expected."""
