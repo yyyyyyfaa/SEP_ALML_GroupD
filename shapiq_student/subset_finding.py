@@ -120,13 +120,10 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict
     index = interaction_values.index
     n_players = interaction_values.n_players
 
-    players = list(range(n_players))
-    
     #converting weights into dict from frozenset(inices)
     e_weights = {frozenset(coal): value for coal, value in zip(index, weights, strict=False)}
 
     N = list(range(n_players))
-    #N = players
     selected_coalitions = set()
 
     #finding coalitions for all lengths
@@ -145,12 +142,6 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict
     #empty coalition
     if frozenset() in e_weights:
         selected_coalitions.add("")
-
-    #debug ausgaben
-    print("Beispielhafte Koalition im Index:", index[0], type(index[0]))
-    print("Koalition als frozenset:", frozenset(index[0]))
-    print("Beispielhafte Selected Coalition:", next(iter(selected_coalitions)))
-    print("Alle selected_coalitions:", selected_coalitions)
 
     #filter values
     new_values = []
