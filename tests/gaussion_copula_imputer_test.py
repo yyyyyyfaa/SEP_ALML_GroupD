@@ -1,11 +1,12 @@
-from __future__ import annotations
-
 """Test class for Gaussian Copula Imputer."""
+
+from __future__ import annotations
 
 import numpy as np
 from scipy.stats import norm
 
 from shapiq_student import GaussianCopulaImputer
+
 
 def dummy_model(x: np.ndarray) -> np.ndarray:
     """A dummy model that returns the sum of the features.

@@ -1,13 +1,12 @@
+"""Gaussian Copula Imputer class."""
+
 from __future__ import annotations
 
-"""Gaussian Copula Imputer class"""
-
-from typing_extensions import TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.linalg import inv
 from scipy.stats import norm, rankdata
-
 from shapiq.games.imputer.base import Imputer
 
 if TYPE_CHECKING:
@@ -66,7 +65,7 @@ class GaussianCopulaImputer(Imputer):
         quantiles = np.clip(values, 1e-6, 1 - 1e-6)  # avoid infs
         return np.quantile(sorted_x, quantiles)
 
-    def fit(self, x: np.ndarray, mask_data: np.ndarray = None) -> GaussianCopulaImputer:
+    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None) -> GaussianCopulaImputer:
         """Fits the imputer to data using Gaussian copula imputer.
 
         Args:
@@ -97,7 +96,7 @@ class GaussianCopulaImputer(Imputer):
         self.CovMatrix += np.eye(self.n_features) * 1e-6
         return self
 
-    def transform(self, X: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
+    def transform(self, X: np.ndarray, mask: np.ndarray | None = None) -> np.ndarray:
         """Impute missing values using Gaussian copula imputer.
 
         Args:
@@ -146,7 +145,7 @@ class GaussianCopulaImputer(Imputer):
 
         return X_imp
 
-    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:   # noqa: FBT001, FBT002
+    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:  # noqa: FBT001, FBT002
         """Evaluate the model based on given coalitions.
 
         Args:
@@ -168,8 +167,8 @@ class GaussianCopulaImputer(Imputer):
 
         for i, coalition in enumerate(coalitions):
             mask = (~coalition).reshape(1, -1)
-            X_cond = self.transform(self._x, mask=mask)
-            predictions[i] = self.model(X_cond)[0]
+            x_cond = self.transform(self._x, mask=mask)
+            predictions[i] = self.model(x_cond)[0]
 
         return predictions
 
