@@ -14,8 +14,7 @@ class Weighted:
     for a given dataset and labels.
     """
 
-    def __init__(self, model: Model, dataset: np.ndarray, labels: np.ndarray, class_index: np.ndarray,
-                 gamma: int) -> None:
+    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "weighted") -> None:
         """Initialize the Weighted class with a dataset, labels, and computation method.
 
         Args:
@@ -25,11 +24,9 @@ class Weighted:
             class_index (np.ndarray): The index of the class to be used for Shapley value computation.
             gamma (int): The gamma parameter of the Shapley value computation.
         """
-        self.model = model
         self.dataset = dataset
+        self.method = method
         self.labels = labels
-        self.gamma = gamma
-        self.class_index = class_index
 
     def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Filters the dataset by removing the validation point and computes the distances between the
@@ -214,16 +211,15 @@ class Weighted:
                                     G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
         return G_il
 
-    def weighted_knn_shapley_single(self, x_val: np.ndarray, y_val: int, gamma: int, K :int) -> np.ndarray:
+    def weighted_knn_shapley(self, x_val: np.ndarray, y_val, gamma, K) -> np.ndarray:
         """Computes the weighted k-nearest neighbor Shapley values for a given input.
 
         Args:
-            x (list): The input data point for which to compute Shapley values.
+            x_val (np.ndarray): The input data point for which to compute Shapley values.
 
         Returns:
             np.ndarray: The computed Shapley values for the input data point.
         """
-
         if K <= 0:
             msg = "K must be greater than 0."
             raise ValueError(msg)
@@ -272,41 +268,3 @@ class Weighted:
             phi[i - 1] = sign * (first_term + second_term)
 
         return phi
-
-    def weighted_knn_shapley(self, x: np.ndarray) -> np.ndarray:
-        """Computes the weighted k-nearest neighbor Shapley values for a given input."""
-        y_test = [self.class_index] * len(self.dataset)
-        # Make sure it is a scalar
-        y_test = np.asarray(y_test).flatten()
-        x_test = x
-        #gamma = self.gamma
-        print(f'x_test: {x_test.shape}')
-        distances, indices = self.model.kneighbors(x_test)
-        print(f'distances: {len(distances)}')
-        gamma = self.calculate_gamma(distances)
-
-        print(gamma, "SADGAWGWEGWAGWGWA")
-        K = getattr(self.model, "n_neighbors", 10)
-        N = x_test.shape[0]
-        phi = np.zeros(len(self.dataset))
-        for i in range(N):
-            gamma_scalar = np.mean(gamma[i])
-            print(i)
-            print(x_test[i])
-            print(y_test[i])
-            phi += self.weighted_knn_shapley_single(x_test[i], y_test[i], gamma_scalar, K)
-
-        return phi
-
-    def calculate_gamma(self, distances):
-        with np.errstate(divide='ignore'):
-            weights = 1.0 / distances
-
-        inf_mask = np.isinf(weights)
-        weights[inf_mask] = 1.0
-
-        for i in range(weights.shape[0]):
-            if np.any(inf_mask[i]):
-                weights[i, ~inf_mask[i]] = 0.0
-
-        return weights
