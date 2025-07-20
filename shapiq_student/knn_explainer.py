@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
     from shapiq.explainer.custom_types import ExplainerIndices
 
+    from shapiq.explainer.custom_types import ExplainerIndices
+
 class KNNExplainer(Explainer):
     def __init__(self,
         model,

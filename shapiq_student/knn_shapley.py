@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from shapiq.utils import Model
 
 
+
 class KNNShapley:
     """Class to compute KNN Shapley values for data points.
 
@@ -76,6 +77,7 @@ class KNNShapley:
 
 
     def knn_shapley(self, X_test: np.ndarray) -> np.ndarray:
+
         """Compute the average KNN Shapley values for one or more test points.
 
         Args:
@@ -94,3 +96,4 @@ class KNNShapley:
         for i in range(n_test):
             sv += self.knn_shapley_single(X_test[i], y_test[i])
         return sv / n_test
+
