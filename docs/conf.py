@@ -9,17 +9,17 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-project = 'SEP Exlplainable AI GroupD'
-copyright = '2025, Alina, Andi, Maren, Tobi, Yifan'
-author = 'Alina, Andi, Maren, Tobi, Yifan'
+project = 'SEP Game Theoretic Explainable AI GroupD'
+copyright = '2025, Alina, Andreas, Maren, Tobias, Yifan'
+author = 'Alina, Andreas, Maren, Tobias, Yifan'
 release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc"]
+extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "nbsphinx", "sphinx.ext.napoleon"]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
