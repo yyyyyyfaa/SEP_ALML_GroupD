@@ -1,79 +1,63 @@
-"""This module provides the Weighted class for computing weighted k-nearest neighbor Shapley values.
-
-using various methods for a given dataset and labels.
-"""
+"""This module provides the Weighted class for computing weighted k-nearest neighbor."""
 
 from __future__ import annotations
 
 from math import comb
 
 import numpy as np
+from scipy.constants import gas_constant
+from shapiq.utils import Model
 
 
 class Weighted:
-    """A class for computing weighted k-nearest neighbor Shapley values using various methods for a given dataset and labels.
-
-    Attributes:
-    ----------
-    dataset : np.ndarray
-        The dataset to be used for k-nearest neighbor calculations.
-    labels : np.ndarray
-        The labels corresponding to the dataset.
-    method : str
-        The method used for Shapley value computation.
-
-    Methods:
-    -------
-    weighted_knn_shapley(x_val: list, y_val: int, gamma: int, K: int)
-        Computes the weighted k-nearest neighbor Shapley values for a given input.
+    """A class for computing weighted k-nearest neighbor Shapley values using various methods
+    for a given dataset and labels.
     """
-    """def __init__(self, dataset: np.ndarray, labels: np.ndarray) -> None:
-        self.dataset = dataset
-        self.labels = labels"""
 
-    def __init__(self, dataset: np.ndarray, labels: np.ndarray, method: str = "weighted") -> None:
+    def __init__(self, model: Model, dataset: np.ndarray, labels: np.ndarray, class_index: np.ndarray,
+                 gamma: int) -> None:
         """Initialize the Weighted class with a dataset, labels, and computation method.
 
-        Parameters
-        ----------
-        dataset : np.ndarray
-            The dataset to be used for k-nearest neighbor calculations.
-        labels : np.ndarray
-            The labels corresponding to the dataset.
-        method : str, optional
-            The method used for Shapley value computation (default is "weighted").
+        Args:
+            dataset (np.ndarray): The dataset to be used for k-nearest neighbor calculations.
+            labels (np.ndarray): The labels corresponding to the dataset.
+            method (str, optional): The method used for Shapley value computation (default is "weighted").
+            class_index (np.ndarray): The index of the class to be used for Shapley value computation.
+            gamma (int): The gamma parameter of the Shapley value computation.
         """
+        self.model = model
         self.dataset = dataset
-        self.method = method
-        self.labels = labels  # labels hinzugefügt für WKNN
+        self.labels = labels
+        self.gamma = gamma
+        self.class_index = class_index
 
     def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Filters the dataset by removing the validation point and computes the distances between the remaining samples and the given validation input.
+        """Filters the dataset by removing the validation point and computes the distances between the
+        remaining samples and the given validation input.
 
-        Parameters
-        ----------
-        x_val : np.ndarray
+        Args:
+            x_val : np.ndarray
             Input sample to validate against.
-        y_val : any
+            y_val : any
             Label of the validation input sample.
 
         Returns:
-        -------
-        tuple[np.ndarray, np.ndarray, np.ndarray]
+            tuple[np.ndarray, np.ndarray, np.ndarray]
             Tuple containing the filtered dataset (X), corresponding labels (Y),
             and distances from each sample to x_val.
         """
+        self.x = x_val
         mask = ~((self.dataset == x_val).all(axis=1) & (self.labels == y_val))
         X = self.dataset[mask]
         Y = self.labels[mask]
-         # Berechnung der distanz
+         # Calculating the distance
         distance = np.linalg.norm(X - x_val, axis=1)
         if x_val.shape[0] != self.dataset.shape[1]:
             msg = "Feature dimension mismatch between x_val and dataset."
             raise ValueError(msg)
 
-        # Sortieren nach Distanz
-        sorted_index = np.argsort(distance)  # Indizes für Sortierung
+        # Sorting for distance
+        sorted_index = np.argsort(distance)
         return X[sorted_index], Y[sorted_index], distance[sorted_index]
 
     def compute_weights(
@@ -86,23 +70,16 @@ class Weighted:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Computes the weighted values and discretized weight intervals for the k-nearest neighbor Shapley value calculation.
 
-        Parameters
-        ----------
-        sorted_distance : np.ndarray
-            Array of distances sorted in ascending order.
-        Y_sorted : np.ndarray
-            Sorted labels corresponding to the sorted distances.
-        y_val : int
-            Target label.
-        gamma : int
-            The gamma parameter for the RBF kernel.
-        K : int
-            The number of nearest neighbors to consider.
+        Args:
+            sorted_distance (np.ndarray): Array of distances sorted in ascending order.
+            Y_sorted (np.ndarray): Sorted labels corresponding to the sorted distances.
+            y_val (int): Target label.
+            gamma (int): The gamma parameter for the RBF kernel.
+            K (int): The number of nearest neighbors to consider.
 
         Returns:
-        -------
-        tuple[np.ndarray, np.ndarray]
-            Tuple containing the weighted values (w_j) and the discretized weight intervals (w_k).
+            tuple[np.ndarray, np.ndarray]: Tuple containing the weighted values (w_j) and the discretized
+            weight intervals (w_k).
         """
         b = 3 #Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
         intervalls = 2**b  # Anzahl der Intervalle
@@ -115,15 +92,11 @@ class Weighted:
     def compute_ranks(self, w_j: np.ndarray) -> np.ndarray:
         """Computes the ranks of the weighted values.
 
-        Parameters
-        ----------
-        w_j : np.ndarray
-            Weighted values for each data point.
+        Args:
+        w_j (np.ndarray): Weighted values for each data point.
 
         Returns:
-        -------
-        np.ndarray
-            Array containing the ranks of the weighted values.
+            np.ndarray: Array containing the ranks of the weighted values.
         """
         sorted_indices = np.argsort(w_j)
         ranks = np.empty_like(sorted_indices)
@@ -133,23 +106,15 @@ class Weighted:
     def compute_f_i(self, N: int, K: int, w_k: np.ndarray, w_j: np.ndarray, i: int) -> dict:
         """Computes the F_i values used in the weighted k-nearest neighbor Shapley value calculation.
 
-        Parameters
-        ----------
-        N : int
-            Total number of data points.
-        K : int
-            Number of nearest neighbors.
-        w_k : np.ndarray
-            Array of discretized weight intervals.
-        w_j : np.ndarray
-            Weighted values for each data point.
-        i : int
-            Index of the current data point.
+        Args:
+            N (int): Total number of data points.
+            K (int): Number of nearest neighbors.
+            w_k (np.ndarray): Array of discretized weight intervals.
+            w_j (np.ndarray): Weighted values for each data point.
+            i (int): Index of the current data point.
 
         Returns:
-        -------
-        dict
-            Dictionary containing computed F_i values.
+            dict: Dictionary containing computed F_i values.
         """
         # Initialisierung von F als Dictionary
         F_i = {}
@@ -174,29 +139,18 @@ class Weighted:
     def compute_r_im(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict) -> dict:
         """Computes the R_im values used in the weighted k-nearest neighbor Shapley value calculation.
 
-        Parameters
-        ----------
-        i : int
-            Index of the current data point.
-        N : int
-            Total number of data points.
-        K : int
-            Number of nearest neighbors.
-        Y_sorted : np.ndarray
-            Sorted labels.
-        y_val : int
-            Target label.
-        w_j : np.ndarray
-            Weighted values for each data point.
-        helper_array : np.ndarray
-            Helper array for weight lookups.
-        F_i : dict
-            Precomputed F_i values.
+        Args:
+        i (int): Index of the current data point.
+        N (int): Total number of data points.
+        K (int): Number of nearest neighbors.
+        Y_sorted (np.ndarray): Sorted labels.
+        y_val (int): Target label.
+        w_j (np.ndarray): Weighted values for each data point.
+        helper_array (np.ndarray): Helper array for weight lookups.
+        F_i (dict): Precomputed F_i values.
 
         Returns:
-        -------
-        dict
-            Dictionary containing computed R_im values.
+            dict: Dictionary containing computed R_im values.
         """
         # Berechnung von R_0
         R_im = {}
@@ -225,31 +179,19 @@ class Weighted:
     def compute_g_il(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict, count_zero: int) -> dict:
         """Computes the G_il values used in the weighted k-nearest neighbor Shapley value calculation.
 
-        Parameters
-        ----------
-        i : int
-            Index of the current data point.
-        N : int
-            Total number of data points.
-        K : int
-            Number of nearest neighbors.
-        Y_sorted : np.ndarray
-            Sorted labels.
-        y_val : int
-            Target label.
-        w_j : np.ndarray
-            Weighted values for each data point.
-        helper_array : np.ndarray
-            Helper array for weight lookups.
-        F_i : dict
-            Precomputed F_i values.
-        count_zero : int
-            Count of positive weights.
+        Args:
+            i int: Index of the current data point.
+            N int: Total number of data points.
+            K (int): Number of nearest neighbors.
+            Y_sorted (np.ndarray): Sorted labels.
+            y_val (int): Target label.
+            w_j (np.ndarray): Weighted values for each data point.
+            helper_array (np.ndarray): Helper array for weight lookups.
+            F_i (dict): Precomputed F_i values.
+            count_zero (int): Count of positive weights.
 
         Returns:
-        -------
-        dict
-            Dictionary containing computed G_il values.
+            dict: Dictionary containing computed G_il values.
         """
         G_il = {}
 
@@ -272,31 +214,22 @@ class Weighted:
                                     G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
         return G_il
 
-    def weighted_knn_shapley(self, x_val: list, y_val: int, gamma: int, K: int) -> np.ndarray:
+    def weighted_knn_shapley_single(self, x_val: np.ndarray, y_val: int, gamma: int, K :int) -> np.ndarray:
         """Computes the weighted k-nearest neighbor Shapley values for a given input.
 
-        Parameters
-        ----------
-        x_val : list
-            The input data point for which to compute Shapley values.
-        y_val : int
-            G_il = self.compute_g_il(i, N, K, Y, y_val, w_j, helper_array, F_i, count_zero)
-        gamma : int
-            The gamma parameter for the RBF kernel.
-        K : int
-            The number of nearest neighbors to consider.
+        Args:
+            x (list): The input data point for which to compute Shapley values.
 
         Returns:
-        -------
-        np.ndarray
-            The computed Shapley values for the input data point.
+            np.ndarray: The computed Shapley values for the input data point.
         """
+
         if K <= 0:
             msg = "K must be greater than 0."
             raise ValueError(msg)
         X, Y, sorted_distance = self.prepare_data(x_val, y_val)
 
-        N = len(X)  # Menge der Daten im Datensatz
+        N = len(X)
         if N == 0:
             msg = "No samples remaining after filtering. Cannot compute Shapley values."
             raise ValueError(msg)
@@ -321,7 +254,6 @@ class Weighted:
             R_im = self.compute_r_im(i, N, K, Y, y_val, w_j, helper_array, F_i)
             G_il = self.compute_g_il(i, N, K, Y, y_val, w_j, helper_array, F_i, count_zero)
 
-            # Berechnung des Shapleys von shapley Values
             sign = []
             sign = np.sign(w_j[i - 1])
 
@@ -341,3 +273,40 @@ class Weighted:
 
         return phi
 
+    def weighted_knn_shapley(self, x: np.ndarray) -> np.ndarray:
+        """Computes the weighted k-nearest neighbor Shapley values for a given input."""
+        y_test = [self.class_index] * len(self.dataset)
+        # Make sure it is a scalar
+        y_test = np.asarray(y_test).flatten()
+        x_test = x
+        #gamma = self.gamma
+        print(f'x_test: {x_test.shape}')
+        distances, indices = self.model.kneighbors(x_test)
+        print(f'distances: {len(distances)}')
+        gamma = self.calculate_gamma(distances)
+
+        print(gamma, "SADGAWGWEGWAGWGWA")
+        K = getattr(self.model, "n_neighbors", 10)
+        N = x_test.shape[0]
+        phi = np.zeros(len(self.dataset))
+        for i in range(N):
+            gamma_scalar = np.mean(gamma[i])
+            print(i)
+            print(x_test[i])
+            print(y_test[i])
+            phi += self.weighted_knn_shapley_single(x_test[i], y_test[i], gamma_scalar, K)
+
+        return phi
+
+    def calculate_gamma(self, distances):
+        with np.errstate(divide='ignore'):
+            weights = 1.0 / distances
+
+        inf_mask = np.isinf(weights)
+        weights[inf_mask] = 1.0
+
+        for i in range(weights.shape[0]):
+            if np.any(inf_mask[i]):
+                weights[i, ~inf_mask[i]] = 0.0
+
+        return weights

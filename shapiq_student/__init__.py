@@ -6,7 +6,9 @@ from .gaussion_copula_imputer import GaussianCopulaImputer
 from .knn_explainer import KNNExplainer
 from .knn_shapley import KNNShapley
 from .threshold import Threshold
-from .wknn_explainer import Weighted
+from .weighted import Weighted
+from .subset_finding import subset_finding
 
-__all__ = ["GaussianCopulaImputer", "GaussianImputer", "KNNExplainer", "KNNShapley", "Threshold", "Weighted"]
+
+__all__ = ["GaussianCopulaImputer", "GaussianImputer", "KNNExplainer", "KNNShapley", "Threshold", "Weighted", "subset_finding"]
 
