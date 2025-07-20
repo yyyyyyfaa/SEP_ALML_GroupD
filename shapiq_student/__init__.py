@@ -2,4 +2,4 @@
 
 
 
-from .imputer import GaussianCopulaImputer, GaussianImputer
+from .gaussian_imputer import GaussianImputer

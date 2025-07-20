@@ -1,10 +1,18 @@
+"""Gaussian  Imputer class."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 from numpy.linalg import inv
 from shapiq.games.imputer.base import Imputer
 
+if TYPE_CHECKING:
+    from shapiq.utils import Model
+
+
 class GaussianImputer(Imputer):
-    """
-    Gaussian Conditional Imputer for missing value imputation.
+    """Gaussian Conditional Imputer for missing value imputation.
 
     This imputer implements conditional mean imputation based on multivariate
     Gaussian distribution assumptions. It estimates the conditional expectation
@@ -14,53 +22,36 @@ class GaussianImputer(Imputer):
     data, then uses the conditional distribution properties of multivariate Gaussian
     to fill missing values with their expected values given observed features.
 
-    Parameters
-    ----------
-    model : callable
-        A trained model that takes feature arrays and returns predictions.
-        Used for generating predictions with imputed data.
-    data : np.ndarray of shape (n_samples, n_features)
-        Training data used to learn the Gaussian distribution parameters.
-        Should contain complete observations (no missing values).
-    x : np.ndarray of shape (1, n_features), optional
-        The sample to be explained/imputed. Can be set later via fit().
-
-    Attributes
-    ----------
-    mean : np.ndarray of shape (n_features,)
-        Mean vector of the training data, estimated during fit().
-    CovMatrix : np.ndarray of shape (n_features, n_features)
-        Covariance matrix of the training data, estimated during fit().
-    n_players : int
-        Number of features (equivalent to n_features).
     """
 
-    def __init__(self, model, data: np.ndarray, x: np.ndarray | None = None):
+    def __init__(self, model: Model, data: np.ndarray, x: np.ndarray | None = None):
+        """Initialize Gaussian Copula Imputer.
+
+        Args:
+            model (Model):
+            data (np.ndarray):
+            x (np.ndarray):
+
+        """
         self.model = model
         self.data = data
         self._x = x
         self.n_players = data.shape[1]
         self.verbose = False
 
-    def fit(self, x: np.ndarray, mask_data: np.ndarray = None):
-        """
-        Fit the Gaussian imputer by estimating distribution parameters.
+    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None):
+        """Fit the Gaussian imputer by estimating distribution parameters.
 
         Estimates the mean vector and covariance matrix from the training data.
         Only uses complete samples (without missing values) for parameter estimation.
 
-        Parameters
-        ----------
-        x : np.ndarray of shape (n_features,)
-            The sample to be explained/imputed. Stored for later use.
-        mask_data : np.ndarray of shape (n_samples, n_features), optional
-            Boolean mask indicating missing values in training data.
+        Args:
+            x :( np.ndarray of shape (n_features,)): The sample to be explained/imputed. Stored for later use.
+            mask_data : (np.ndarray of shape (n_samples, n_features), optional): Boolean mask indicating missing values in training data.
             If None, assumes all training data is complete.
 
-        Returns
-        -------
-        self : GaussianImputer
-            Returns self for method chaining.
+        Returns:
+            self (GaussianImputer): Returns self for method chaining.
         """
         # save sample to explain
         self._x = x
@@ -75,25 +66,19 @@ class GaussianImputer(Imputer):
         self.CovMatrix = np.cov(X_full, rowvar=False, bias=False)
         return self
 
-    def transform(self, X: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
-        """
-        Transform data by imputing missing values with conditional means.
+    def transform(self, X: np.ndarray, mask: np.ndarray| None = None) -> np.ndarray:
+        """Transform data by imputing missing values with conditional means.
 
         For each sample, missing features are filled with their conditional
         expectation given observed features, based on the fitted Gaussian distribution.
 
-        Parameters
-        ----------
-        X : np.ndarray of shape (n_samples, n_features)
-            Input data with potentially missing values (NaN).
-        mask : np.ndarray of shape (n_samples, n_features), optional
-            Boolean mask where True indicates missing values.
+        Args:
+            X (np.ndarray of shape (n_samples, n_features)): Input data with potentially missing values (NaN).
+            mask : (np.ndarray of shape (n_samples, n_features), optional): Boolean mask where True indicates missing values.
             If None, missing values are detected as NaN.
 
-        Returns
-        -------
-        X_imputed : np.ndarray of shape (n_samples, n_features)
-            Data with missing values filled by conditional means.
+        Returns:
+            X_imputed (np.ndarray of shape (n_samples, n_features)): Data with missing values filled by conditional means.
         """
         X_imp = X.copy()
         # Handle default mask
@@ -135,26 +120,20 @@ class GaussianImputer(Imputer):
         return X_imp
 
     # Using imputer object as a method
-    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:
-        """
-        Make the imputer callable for use with shapiq framework.
+    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:  # noqa: ARG002, FBT001, FBT002
+        """Make the imputer callable for use with shapiq framework.
 
         This method allows the imputer to be used as a game function in the
         shapiq framework. It takes coalitions (indicating which features to keep)
         and returns model predictions after imputing missing features.
 
-        Parameters
-        ----------
-        coalitions : np.ndarray of shape (n_coalitions, n_features)
-            Boolean array where True indicates features to keep (observe),
+        Args:
+            coalitions (np.ndarray of shape (n_coalitions, n_features)): Boolean array where True indicates features to keep (observe),
             and False indicates features to set as missing (impute).
-        verbose : bool, default=False
-            If True, print verbose output. Currently not used.
+        verbose (bool, default=False): If True, print verbose output. Currently not used.
 
-        Returns
-        -------
-        predictions : np.ndarray of shape (n_coalitions,)
-            Model predictions for each coalition after imputation.
+        Returns:
+            predictions (np.ndarray of shape (n_coalitions,)): Model predictions for each coalition after imputation.
         """
         if isinstance(coalitions, list):
             coalitions = np.array(coalitions)
@@ -169,37 +148,5 @@ class GaussianImputer(Imputer):
             mask = (~coalition).reshape(1, -1)
             X_cond = self.transform(self._x, mask=mask)
             predictions[i] = self.model(X_cond)[0]
-
-        return predictions
-
-
-class GaussianCopulaImputer(Imputer):
-
-    def __init__(self, model, data: np.ndarray, x: np.ndarray | None = None):
-        self.model = model
-        self.data = data
-        self._x = x
-        self.n_players = data.shape[1]
-        self.randomState = np.random.RandomState(42)
-        self.verbose = False
-
-    def fit(self, x: np.ndarray):
-        self._x = x
-        return self
-
-    # Using imputer object as a method
-    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:
-        if isinstance(coalitions, list):
-            coalitions = np.array(coalitions)
-        if coalitions.dtype != bool:
-            coalitions = coalitions.astype(bool)
-
-        n_coalitions, n_features = coalitions.shape
-        predictions = np.zeros(n_coalitions)
-
-        for i, coalition in enumerate(coalitions):
-            x_masked = self._x.copy()
-            x_masked[0, ~coalition] = 0  # set inactive features to 0
-            predictions[i] = self.model(x_masked)[0]
 
         return predictions

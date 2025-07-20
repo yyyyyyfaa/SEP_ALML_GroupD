@@ -14,7 +14,7 @@ The tests cover:
 import numpy as np
 import pytest
 from shapiq.games.imputer.base import Imputer
-from shapiq_student.imputer import GaussianImputer
+from shapiq_student.gaussian_imputer import GaussianImputer
 
 class DummyModel:
     """
