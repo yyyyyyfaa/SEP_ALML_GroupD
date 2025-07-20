@@ -43,11 +43,9 @@ class KNNExplainer(Explainer):
             index (str): The index type for explanation.
             random_state (int): Seed for random number generation.
         """
-        super().__init__(model, data, class_index, max_order=max_order, index = index)
         self.dataset = data
+        self.model = model
         self.labels = labels
-        self.max_order = max_order
-        self.index = index
         self.model_name = model_name
         self.N, self.M = data.shape
         self.random_state = np.random.RandomState(random_state)
