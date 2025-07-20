@@ -22,7 +22,7 @@ jobs:
       - name: Prepare docs/examples
         run: |
           mkdir -p docs/examples
-          cp ../examples/*.ipynb docs/examples/
+          cp /examples/*.ipynb docs/examples/
       - name: Sphinx build
         run: |
           sphinx-apidoc -o docs/ shapiq_student examples -f
