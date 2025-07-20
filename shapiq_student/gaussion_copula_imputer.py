@@ -23,7 +23,7 @@ class GaussianCopulaImputer(Imputer):
         """Initialize Gaussian Copula Imputer.
 
         Args:
-            model (GaussianCopula): Gaussian Copula Model
+            model (GaussianCopula): Gaussian Imputer Copula Model
             data (np.ndarray): Training data set
             x (np.ndarray): Test instance for masking the features and for imputing.
 

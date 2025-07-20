@@ -18,11 +18,13 @@ if TYPE_CHECKING:
     from typing import Any
 
     from shapiq.explainer.custom_types import ExplainerIndices
+    from shapiq.utils import Model
 
 
 class KNNExplainer(Explainer):
+    """Class KNNExplainer."""
     def __init__(self,
-        model,
+        model: Model,
         data: np.ndarray,
         labels: np.ndarray,
         class_index : int | None = None,
@@ -59,13 +61,13 @@ class KNNExplainer(Explainer):
             self.mode = "normal"
             self.knn= KNNShapley(model, data, labels, class_index)
 
-    def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:  # Pylance bei args, kwargs?
+    def explain(self, x: np.ndarray, *args: Any, **kwargs: Any) -> InteractionValues:  # noqa: ANN401, ARG002
         """Explain the prediction for a given input sample using KNN-based Shapley values.
 
-        Args
+        Args:
             x(np.ndarray): The input sample to explain.
-            *args : Additional positional arguments.
-            **kwargs : Additional keyword arguments. May include 'gamma' for weighted KNN.
+            *args (Any): Additional positional arguments.
+            **kwargs (Any): Additional keyword arguments. May include 'gamma' for weighted KNN.
 
         Returns:
             InteractionValues: The computed Shapley or interaction values for the input sample.

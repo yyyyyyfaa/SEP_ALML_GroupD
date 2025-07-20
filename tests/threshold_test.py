@@ -10,13 +10,11 @@ from __future__ import annotations
 
 from _pytest import unittest
 import numpy as np
-from tests_grading.conftest import *
+from sklearn.neighbors import KNeighborsClassifier
+from tests_grading.conftest import *  # noqa: F403
 
 from shapiq_student.threshold import Threshold
 
-
-if __name__ == "__main__":
-    unittest.main()
 
 # Test shapley values
 def test_shapley_threshold(data_train, x_explain, knn_basic):
@@ -106,4 +104,5 @@ def test_shapley_result_against_expected():
 
     np.testing.assert_allclose(result, expected, atol=1e-5)
 
-
+if __name__ == "__main__":
+    unittest.main()

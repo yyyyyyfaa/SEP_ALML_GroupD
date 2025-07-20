@@ -28,9 +28,9 @@ class GaussianImputer(Imputer):
         """Initialize Gaussian Copula Imputer.
 
         Args:
-            model (Model):
-            data (np.ndarray):
-            x (np.ndarray):
+            model (Model): Gaussian Imputer Model
+            data (np.ndarray): Training Dataset
+            x (np.ndarray): Test instance
 
         """
         self.model = model
@@ -130,7 +130,7 @@ class GaussianImputer(Imputer):
         Args:
             coalitions (np.ndarray of shape (n_coalitions, n_features)): Boolean array where True indicates features to keep (observe),
             and False indicates features to set as missing (impute).
-        verbose (bool, default=False): If True, print verbose output. Currently not used.
+            verbose (bool, default=False): If True, print verbose output. Currently not used.
 
         Returns:
             predictions (np.ndarray of shape (n_coalitions,)): Model predictions for each coalition after imputation.
