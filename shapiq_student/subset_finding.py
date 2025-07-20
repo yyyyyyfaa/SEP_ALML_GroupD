@@ -32,7 +32,7 @@ def v_hat(Players: list, e_weights: dict, k_max: int) -> float:
 def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set:
     """Find a coalition of the given length that maximizes the value function using a greedy algorithm.
 
-   Args:
+    Args:
         length (int): Desired size of the coalition.
         N (list): List of players.
         e_weights (dict): Dictionary mapping frozensets of players to their associated weights.
@@ -89,7 +89,7 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> Inte
 
     Args:
     interaction_values (InteractionValues): he original Interaction values object.
-    k_max (int): Maximum coalition size to consider.
+    max_size (int): Maximum coalition size to consider.
 
     Returns:
         InteractionValues: A new InteractionValues object with filtered/support-selected entries.

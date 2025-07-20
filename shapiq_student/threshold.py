@@ -71,8 +71,9 @@ class Threshold:
                 c_x = len(neighbor_indices_minus_zi) + 1
 
                 term2 = (int(y_i == y_val) - (1 / num_classes)) / c_x
+                k = 2
 
-                if c_x >= 2:
+                if c_x >= k:
                     # Amount of neighbors from x_val in D-zi with the same labels
                     y_neighbors = y_minus_i[neighbor_indices_minus_zi]
                     c_plus = np.sum(y_neighbors == y_val)
@@ -90,7 +91,7 @@ class Threshold:
                             A2 += term1
                     A2 -= 1.0
                     # Calculating shapley value for z_i
-                    phi[i] = int(c_x >= 2) * A1 * A2 + term2
+                    phi[i] = int(c_x >= k) * A1 * A2 + term2
 
                 else:
                     phi[i] = term2

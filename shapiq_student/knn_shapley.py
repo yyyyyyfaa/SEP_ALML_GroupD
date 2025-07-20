@@ -77,7 +77,6 @@ class KNNShapley:
 
 
     def knn_shapley(self, X_test: np.ndarray) -> np.ndarray:
-
         """Compute the average KNN Shapley values for one or more test points.
 
         Args:
