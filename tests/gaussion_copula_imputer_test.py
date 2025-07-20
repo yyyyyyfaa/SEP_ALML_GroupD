@@ -1,10 +1,11 @@
+from __future__ import annotations
+
+"""Test class for Gaussian Copula Imputer."""
+
+import numpy as np
 from scipy.stats import norm
 
 from shapiq_student import GaussianCopulaImputer
-import pytest
-import numpy as np
-import pandas as pd
-
 
 def dummy_model(x: np.ndarray) -> np.ndarray:
     """A dummy model that returns the sum of the features.
@@ -22,9 +23,13 @@ def dummy_model(x: np.ndarray) -> np.ndarray:
     return np.sum(x, axis=1)
 
 def simple_data():
-    np.random.seed(0)
-    data = np.random.rand(100, 5)
-    x = np.random.rand(1, 5)
+    """Generates data for testing purposes.
+
+    Returns: tuple[np.ndarray, np.ndarray]: training data.
+    """
+    rng = np.random.default_rng(seed=0)
+    data = rng.random((100, 5))
+    x = rng.random((1, 5))
     return data, x
 
 
@@ -63,13 +68,16 @@ class TestGaussianCopulaImputer:
         np.testing.assert_allclose(back, col,  rtol=1e-6, atol=1 - 1e-6)
 
     def test_transform_no_missing(self):
+        """Tests if transform does not change data."""
         data, x = simple_data()
         imputer = GaussianCopulaImputer(model=dummy_model, data= data)
         imputer.fit(x)
+        # Data should remain the same
         x_imp = imputer.transform(x)
         assert np.allclose(x_imp, x)
 
     def test_call_returns_prediction(self):
+        """Tests if the __call__ method returns valid prediction."""
         data, x = simple_data()
         imputer = GaussianCopulaImputer(model=dummy_model, data= data)
         imputer.fit(x)
@@ -80,6 +88,7 @@ class TestGaussianCopulaImputer:
         assert np.isfinite(preds).all()
 
     def test_transform_all_missing(self):
+        """Tests imputation if all values are missing in a row."""
         data, x = simple_data()
         x_missing = np.full_like(x, np.nan)
         imputer = GaussianCopulaImputer(model=dummy_model, data=data)
@@ -90,6 +99,7 @@ class TestGaussianCopulaImputer:
 
 
     def test_fit_with_mask_data_filters_rows(self):
+        """Tests if rows with missing values are excluded while fitting."""
         data, x = simple_data()
         mask_data = np.zeros_like(data, dtype=bool)
         mask_data[0, 0] = True
@@ -100,6 +110,7 @@ class TestGaussianCopulaImputer:
         assert imp.mean.shape[0] == data.shape[1]
 
     def test_coalitions_type_conversion(self):
+        """Tests that integer-type coalitions are converted to boolean."""
         data, x = simple_data()
         imputer = GaussianCopulaImputer(model=dummy_model, data=data)
         imputer.fit(x)
@@ -112,7 +123,7 @@ class TestGaussianCopulaImputer:
         assert np.isfinite(preds).all()
 
     def test_cond_mean_fallback_if_covariance_singular(self):
-
+        """Tests if fallback is used when covariance is singular."""
         data, x = simple_data()
         imputer = GaussianCopulaImputer(model=dummy_model, data=data)
         imputer.fit(x)

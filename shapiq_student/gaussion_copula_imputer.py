@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+"""Gaussian Copula Imputer class"""
+
+from typing_extensions import TYPE_CHECKING
+
 import numpy as np
 from numpy.linalg import inv
 from shapiq.games.imputer.base import Imputer
@@ -46,20 +52,45 @@ class GaussianCopulaImputer(Imputer):
         self.verbose = False
         self.n_features = data.shape[1]
 
-    def ecdf_transform(self, x):
-        # Compute empirical CDF transform to normal margins
+    def ecdf_transform(self, x: np.ndarray) -> np.ndarray:
+        """Compute empirical CDF transform tp normal margins.
+
+        Args:
+            x (np.ndarray): Input data vector.
+
+        Returns:
+             np.ndarray: Transformed data to standard normal space.
+        """
         x = np.asarray(x).flatten()
         ranks = rankdata(x, method='average') # Ranking the values
         uniform = np.clip(ranks / len(x), 1e-6, 1 - 1e-6)
         return norm.ppf(uniform)
 
-    def inverse_ecdf(self, x, values):
+    def inverse_ecdf(self, x: np.ndarray, values: np.ndarray) -> np.ndarray:
+        """Back transforms with ecdf using quantiles.
+
+        Args:
+            x (np.ndarray): Input data vector.
+            values (np.ndarray): Quantile values.
+
+        Returns:
+            np.ndarray: Inversed-transformed values.
+        """
         # Approximate inverse ECDF using quantiles
         sorted_x = np.sort(x)
         quantiles = np.clip(values, 1e-6, 1 - 1e-6)  # avoid infs
         return np.quantile(sorted_x, quantiles)
 
-    def fit(self, x: np.ndarray, mask_data: np.ndarray = None):
+    def fit(self, x: np.ndarray, mask_data: np.ndarray = None) -> GaussianCopulaImputer:
+        """Fits the imputer to data using Gaussian copula imputer.
+
+        Args:
+            x (np.ndarray): Data matrix.
+            mask_data (np.ndarray): Masking missing values.
+
+        Return:
+            self
+        """
         self._x = x
 
         if mask_data is not None:
