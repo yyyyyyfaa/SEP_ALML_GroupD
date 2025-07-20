@@ -25,9 +25,8 @@ jobs:
           cp ../examples/*.ipynb docs/examples/
       - name: Sphinx build
         run: |
-          cd docs
-          sphinx-apidoc -o . ../shapiq_student ../examples -f
-          make html
+          sphinx-apidoc -o docs/ shapiq_student examples -f
+          make -C docs html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
