@@ -24,14 +24,13 @@ class GaussianImputer(Imputer):
 
     """
 
-    def __init__(self, model: Model, data: np.ndarray, x: np.ndarray | None = None):
+    def __init__(self, model: Model, data: np.ndarray, x: np.ndarray | None = None) -> None:
         """Initialize Gaussian Copula Imputer.
 
         Args:
             model (Model): Gaussian Imputer Model
             data (np.ndarray): Training Dataset
             x (np.ndarray): Test instance
-
         """
         self.model = model
         self.data = data
@@ -39,7 +38,7 @@ class GaussianImputer(Imputer):
         self.n_players = data.shape[1]
         self.verbose = False
 
-    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None):
+    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None)-> GaussianImputer:
         """Fit the Gaussian imputer by estimating distribution parameters.
 
         Estimates the mean vector and covariance matrix from the training data.
@@ -144,7 +143,7 @@ class GaussianImputer(Imputer):
         predictions = np.zeros(n_coalitions)
 
         for i, coalition in enumerate(coalitions):
-            # coalition=True keep，False as missing
+            # coalition=True keep, False as missing
             mask = (~coalition).reshape(1, -1)
             X_cond = self.transform(self._x, mask=mask)
             predictions[i] = self.model(X_cond)[0]
