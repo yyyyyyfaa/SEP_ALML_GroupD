@@ -9,8 +9,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../../shapiq_student"))
-sys.path.insert(0, os.path.abspath("../../examples"))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath("../examples"))
 
 project = 'SEP Game Theoretic Explainable AI GroupD'
 copyright = '2025, Alina, Andreas, Maren, Tobias, Yifan'
