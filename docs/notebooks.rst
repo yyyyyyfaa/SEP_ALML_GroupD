@@ -5,4 +5,7 @@ Jupyter Notebooks
    :maxdepth: 1
    :glob:
 
-   examples/*.ipynb
+   examples/subset_finding_example.ipynb
+   examples/testbook.ipynb
+   examples/textbook.ipynb
+   examples/threshbook.ipynb
