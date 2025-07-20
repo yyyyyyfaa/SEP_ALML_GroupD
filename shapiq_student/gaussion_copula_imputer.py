@@ -40,7 +40,7 @@ class GaussianCopulaImputer(Imputer):
         """Compute empirical CDF transform tp normal margins.
 
         Args:
-            x (np.ndarray): Input data vector.
+            x (np.ndarray): Input data.
 
         Returns:
              np.ndarray: Transformed data to standard normal space.
