@@ -19,6 +19,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install sphinx sphinx_rtd_theme myst_parser nbsphinx furo ipykernel numpy shapiq overrides
+      - name: Prepare docs/examples
+        run: |
+          mkdir -p docs/examples
+          cp ../examples/*.ipynb docs/examples/
       - name: Sphinx build
         run: |
           cd docs

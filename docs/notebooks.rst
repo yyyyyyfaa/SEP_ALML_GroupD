@@ -5,4 +5,4 @@ Jupyter Notebooks
    :maxdepth: 1
    :glob:
 
-   ../examples/*.ipynb
+   examples/*.ipynb
