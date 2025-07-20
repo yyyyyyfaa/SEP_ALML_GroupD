@@ -46,8 +46,6 @@ class KNNExplainer(Explainer):
         super().__init__(model, data, class_index, max_order=max_order, index = index)
         self.dataset = data
         self.labels = labels
-        self.max_order = max_order
-        self.index = index
         self.model_name = model_name
         self.N, self.M = data.shape
         self.random_state = np.random.RandomState(random_state)
@@ -91,3 +89,4 @@ class KNNExplainer(Explainer):
         )
 
         return interaction_values
+
