@@ -5,12 +5,11 @@ from __future__ import annotations
 from math import comb
 
 import numpy as np
-from scipy.constants import gas_constant
-from shapiq.utils import Model
 
 
 class Weighted:
-    """A class for computing weighted k-nearest neighbor Shapley values using various methods
+    """A class for computing weighted k-nearest neighbor Shapley values using various methods.
+
     for a given dataset and labels.
     """
 
@@ -29,19 +28,20 @@ class Weighted:
         self.labels = labels
 
     def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Filters the dataset by removing the validation point and computes the distances between the
-        remaining samples and the given validation input.
+        """Prepares the data by filtering out the input sample and sorting the remaining samples by distance.
 
         Args:
-            x_val : np.ndarray
-            Input sample to validate against.
-            y_val : any
-            Label of the validation input sample.
+            x_val (np.ndarray): The input data point to exclude from the dataset.
+            y_val (any): The label of the input data point to exclude.
 
         Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]
-            Tuple containing the filtered dataset (X), corresponding labels (Y),
-            and distances from each sample to x_val.
+            tuple[np.ndarray, np.ndarray, np.ndarray]:
+                - Filtered and sorted dataset (X),
+                - Corresponding labels (Y),
+                - Sorted distances from x_val.
+
+        Raises:
+            ValueError: If the feature dimension of x_val does not match the dataset.
         """
         self.x = x_val
         mask = ~((self.dataset == x_val).all(axis=1) & (self.labels == y_val))
@@ -49,6 +49,7 @@ class Weighted:
         Y = self.labels[mask]
          # Calculating the distance
         distance = np.linalg.norm(X - x_val, axis=1)
+        x_val = np.array(x_val)
         if x_val.shape[0] != self.dataset.shape[1]:
             msg = "Feature dimension mismatch between x_val and dataset."
             raise ValueError(msg)
@@ -177,8 +178,8 @@ class Weighted:
         """Computes the G_il values used in the weighted k-nearest neighbor Shapley value calculation.
 
         Args:
-            i int: Index of the current data point.
-            N int: Total number of data points.
+            i (int): Index of the current data point.
+            N (int): Total number of data points.
             K (int): Number of nearest neighbors.
             Y_sorted (np.ndarray): Sorted labels.
             y_val (int): Target label.
@@ -211,11 +212,14 @@ class Weighted:
                                     G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
         return G_il
 
-    def weighted_knn_shapley(self, x_val: np.ndarray, y_val, gamma, K) -> np.ndarray:
+    def weighted_knn_shapley(self, x_val: np.ndarray, y_val: int, gamma: int, K: int) -> np.ndarray:
         """Computes the weighted k-nearest neighbor Shapley values for a given input.
 
         Args:
             x_val (np.ndarray): The input data point for which to compute Shapley values.
+            y_val (int): The label of the input data point.
+            gamma (int): The gamma parameter for the RBF kernel.
+            K (int): The number of nearest neighbors to consider.
 
         Returns:
             np.ndarray: The computed Shapley values for the input data point.
