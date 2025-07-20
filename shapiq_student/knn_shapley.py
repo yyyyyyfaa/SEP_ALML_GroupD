@@ -1,13 +1,13 @@
-"""Module for computing KNN Shapley values for data points."""
+"""Module for computing KNN Shapley values for data points.
+
+This module provides the KNNShapley class to estimate the contribution of each training data point
+to the prediction of a K-Nearest Neighbors model using Shapley values.
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 
-if TYPE_CHECKING:
-    from shapiq.utils import Model
 
 
 class KNNShapley:
@@ -16,16 +16,31 @@ class KNNShapley:
     This class estimates the contribution of each training data point to the prediction
     of a K-Nearest Neighbors model using Shapley values.
 
+    Attributes:
+    ----------
+    model : object
+        The KNN model instance.
+    dataset : array-like
+        The training data.
+    labels : array-like
+        The labels for the training data.
+    class_index : int
+        The class index for which Shapley values are computed.
     """
 
-    def __init__(self, model: Model, data: np.ndarray, labels: np.ndarray, class_index: np.ndarray) -> None:
+    def __init__(self, model, data, labels, class_index) -> None:
         """Initialize the KNNShapley instance.
 
-        Args:
-            model (Model): The KNN model instance.
-            data (np.ndarray): The training data.
-            labels (np.ndarray): The labels for the training data.
-            class_index (np.ndarray): y_Test data.
+        Parameters
+        ----------
+        model : object
+            The KNN model instance.
+        data : array-like
+            The training data.
+        labels : array-like
+            The labels for the training data.
+        class_index : int
+            The class index for which Shapley values are computed.
         """
         self.model = model
         self.dataset = data
@@ -33,15 +48,20 @@ class KNNShapley:
         self.class_index = class_index
 
 
-    def knn_shapley_single(self, X_test: np.ndarray, y_test : int ) -> np.ndarray:
+    def knn_shapley_single(self, X_test, y_test) -> np.ndarray:
         """Compute KNN Shapley values for a single test point.
 
-        Args:
-            X_test (np.ndarray): The test data points.
-            y_test (int): The test label.
+        Parameters
+        ----------
+        X_test : array-like
+            The test data point(s).
+        y_test : int or array-like
+            The label(s) for the test data point(s).
 
         Returns:
-            np.ndarray: The computed Shapley values for one training data point.
+        -------
+        np.ndarray
+            The computed Shapley values for each training data point.
         """
         y_train = np.asarray(self.labels)
         X_train = np.asarray(self.dataset)
@@ -50,8 +70,8 @@ class KNNShapley:
 
         # storage shapley values
         shap_values = np.zeros(N)
-        # for j in range (n_test):
-        # process each test point
+        #for j in range (n_test):
+            # process each test point
         dists = np.linalg.norm(X_train - X_test, axis=1)
         idx_sorted = np.argsort(dists)
         s = np.zeros(N)
@@ -74,23 +94,26 @@ class KNNShapley:
 
 
 
-
-    def knn_shapley(self, X_test: np.ndarray) -> np.ndarray:
+    def knn_shapley(self, X_test) -> np.ndarray:
         """Compute the average KNN Shapley values for one or more test points.
 
-        Args:
-            X_test (np.ndarray): Array with test data points.
+        Parameters
+        ----------
+        X_test : array-like
+            The test data point(s).
 
         Returns:
-            np.ndarray: The average Shapley values for each test point.
+        -------
+        np.ndarray
+            The average Shapley values for each training data point.
         """
-        y_test = [self.class_index] * len(X_test)
-        # Make sure it is a scalar
-        y_test = np.asarray(y_test).flatten()
-        X_train = np.asarray(self.dataset)
-        N = X_train.shape[0]
-        n_test = X_test.shape[0]
-        sv = np.zeros(N)
-        for i in range(n_test):
-            sv += self.knn_shapley_single(X_test[i], y_test[i])
-        return sv / n_test
+        X = np.atleast_2d(X_test)
+        n = X.shape[0]
+        sv = np.zeros(np.asarray(self.dataset).shape[0])
+        # Use provided class_index for all test points
+        for x in X:
+            sv += self.knn_shapley_single(x, self.class_index)
+        return sv / n
+
+
+

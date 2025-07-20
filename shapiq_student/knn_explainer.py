@@ -5,17 +5,14 @@ This module provides the KNNExplainer class, which supports normal, weighted, an
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 
 import numpy as np
 from shapiq import Explainer, InteractionValues
 
-from .knn_shapley import KNNShapley
-from .threshold import Threshold
-from .weighted import Weighted
+from shapiq_student.threshold import Threshold
 
-if TYPE_CHECKING:
-    from typing import Any
+from .knn_shapley import KNNShapley
+
 
     from shapiq.explainer.custom_types import ExplainerIndices
 
@@ -27,11 +24,13 @@ class KNNExplainer(Explainer):
         class_index : int | None = None,
         model_name : str | None = None,
         max_order: int = 1,
-        index: ExplainerIndices = "SV",
-        random_state: int = 42) -> None:
+
+        index = "SV",
+        random_state = 42) -> None:
         """Initialize the KNNExplainer.
 
-        Args:
+        Parameters:
+
             model: The KNN model to be explained.
             data (np.ndarray): The dataset used for explanation.
             labels (np.ndarray): The labels corresponding to the data.
@@ -44,39 +43,42 @@ class KNNExplainer(Explainer):
         super().__init__(model, data, class_index, max_order=max_order, index = index)
         self.dataset = data
         self.labels = labels
-        self.max_order = max_order
-        self.index = index
         self.model_name = model_name
         self.N, self.M = data.shape
         self.random_state = np.random.RandomState(random_state)
 
         if hasattr(model, "weights") and model.weights == "distance":
             self.mode = "weighted"
-            self.weights = Weighted(model, data, labels, class_index, model.weights)
         elif hasattr(model, "radius") and model.radius is not None:
             self.mode = "threshold"
             self.threshold = Threshold(model, data, labels, class_index, model.radius)
         else:
             self.mode = "normal"
-            self.knn= KNNShapley(model, data, labels, class_index)
 
-    def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:  # Pylance bei args, kwargs?
+    def explain(self, x: np.ndarray, *args, **kwargs) -> InteractionValues:
         """Explain the prediction for a given input sample using KNN-based Shapley values.
 
-        Args
-            x(np.ndarray): The input sample to explain.
-            *args : Additional positional arguments.
-            **kwargs : Additional keyword arguments. May include 'gamma' for weighted KNN.
+        Parameters
+        ----------
+        x : np.ndarray
+            The input sample to explain.
+        *args :
+            Additional positional arguments.
+        **kwargs :
+            Additional keyword arguments. May include 'gamma' for weighted KNN.
 
         Returns:
-            InteractionValues: The computed Shapley or interaction values for the input sample.
+        -------
+        InteractionValues
+            The computed Shapley or interaction values for the input sample.
         """
+        gamma = kwargs.get("gamma")
         if self.mode == "threshold":
             shapley_values = self.threshold.threshold_knn_shapley(x)
         elif self.mode == "weighted":
-            shapley_values = self.weights.weighted_knn_shapley(x)
+            shapley_values = self.weighted_knn_shapley(x, gamma)
         else:
-            shapley_values = self.knn.knn_shapley(x)
+            shapley_values = self.knn_shapley(x)
 
         n_samples = self.dataset.shape[0]
         interaction_values = InteractionValues(
