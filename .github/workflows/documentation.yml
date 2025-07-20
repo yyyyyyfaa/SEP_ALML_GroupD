@@ -22,11 +22,12 @@ jobs:
       - name: Prepare docs/examples
         run: |
           mkdir -p docs/examples
-          cp /examples/*.ipynb docs/examples/
+          cp ../examples/*.ipynb docs/examples/
       - name: Sphinx build
         run: |
-          sphinx-apidoc -o docs/ shapiq_student examples -f
-          make -C docs html
+          cd docs
+          sphinx-apidoc -o . ../shapiq_student -f
+          make html
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
