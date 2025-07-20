@@ -37,6 +37,7 @@ class TestGaussianCopulaImputer:
     """Tests for calling the GaussianCopulaImputer class."""
 
     def test_fit_sets_correct_mean_covariance(self):
+        """Tests if fit sets mean and covariance correctly."""
         data, X = simple_data()
         imp = GaussianCopulaImputer(model=dummy_model, data=data)
         imp.fit(X)
@@ -45,6 +46,7 @@ class TestGaussianCopulaImputer:
         assert imp.CovMatrix.shape == (data.shape[1], data.shape[1])
 
     def test_fit_correct_mean_covariance(self):
+        """Tests if fit gives the correct mean and covariance."""
         data, x = simple_data()
         imp = GaussianCopulaImputer(model=dummy_model, data=data)
         imp.fit(x)
@@ -59,6 +61,7 @@ class TestGaussianCopulaImputer:
         np.testing.assert_allclose(imp.CovMatrix, expected_cov, rtol=1e-5)
 
     def test_ecdf_forward_backward(self):
+        """Tests if transforming data works correct."""
         data,_ = simple_data()
         col = data[:, 0]
         imp = GaussianCopulaImputer(model=dummy_model, data = data)

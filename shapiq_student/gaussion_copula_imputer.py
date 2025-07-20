@@ -6,44 +6,29 @@ from typing_extensions import TYPE_CHECKING
 
 import numpy as np
 from numpy.linalg import inv
-from shapiq.games.imputer.base import Imputer
 from scipy.stats import norm, rankdata
 
-class GaussianImputer(Imputer):
+from shapiq.games.imputer.base import Imputer
 
-    def __init__(self, model, data: np.ndarray, x: np.ndarray | None = None):
-        self.model = model
-        self.data = data
-        self._x = x
-        self.n_players = data.shape[1]
-        self.randomState = np.random.RandomState(42)
-        self.verbose = False
-
-    def fit(self, x: np.ndarray):
-        self._x = x
-        return self
-
-    # Using imputer object as a method
-    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:
-        if isinstance(coalitions, list):
-            coalitions = np.array(coalitions)
-        if coalitions.dtype != bool:
-            coalitions = coalitions.astype(bool)
-
-        n_coalitions, n_features = coalitions.shape
-        predictions = np.zeros(n_coalitions)
-
-        for i, coalition in enumerate(coalitions):
-            x_masked = self._x.copy()
-            x_masked[0, ~coalition] = 0  # set inactive features to 0
-            predictions[i] = self.model(x_masked)[0]
-
-        return predictions
-
+if TYPE_CHECKING:
+    from shapiq.utils import Model
 
 class GaussianCopulaImputer(Imputer):
+    """Imputer which uses a Gaussian Copula to impute missing values.
 
-    def __init__(self, model, data: np.ndarray, x: np.ndarray | None = None):
+    The imputer transforms the input data using empirical CDFs to Gaussian copula space, model dependencies with
+    multivariant normal distributions and evaluate conditional imputation of missing values.
+    """
+
+    def __init__(self, model: Model, data: np.ndarray, x: np.ndarray | None = None) -> None:
+        """Initialize Gaussian Copula Imputer.
+
+        Args:
+            model (GaussianCopula): Gaussian Copula Model
+            data (np.ndarray): Training data set
+            x (np.ndarray): Test instance for masking the features and for imputing.
+
+        """
         self.model = model
         self.data = data
         self._x = x
@@ -62,7 +47,7 @@ class GaussianCopulaImputer(Imputer):
              np.ndarray: Transformed data to standard normal space.
         """
         x = np.asarray(x).flatten()
-        ranks = rankdata(x, method='average') # Ranking the values
+        ranks = rankdata(x, method="average") # Ranking the values
         uniform = np.clip(ranks / len(x), 1e-6, 1 - 1e-6)
         return norm.ppf(uniform)
 
@@ -113,6 +98,15 @@ class GaussianCopulaImputer(Imputer):
         return self
 
     def transform(self, X: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
+        """Impute missing values using Gaussian copula imputer.
+
+        Args:
+            X (np.ndarray): Data matrix with missing values.
+            mask (np.ndarray): Masking missing values.
+
+        Returns:
+            np.ndarray: Transformed data.
+        """
         X_imp = X.copy()
         if mask is None:
             mask = np.isnan(X_imp)
@@ -152,7 +146,18 @@ class GaussianCopulaImputer(Imputer):
 
         return X_imp
 
-    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:
+    def __call__(self, coalitions: np.ndarray, verbose: bool = False) -> np.ndarray:   # noqa: FBT001, FBT002
+        """Evaluate the model based on given coalitions.
+
+        Args:
+            coalitions: The coalitions to evaluate as a one-hot matrix or a list of tuples.
+            verbose: Whether to show a progress bar for the evaluation. Defaults to ``False``.
+
+        Returns:
+            predictions: The values of the coalitions.
+        """
+        if verbose:
+            pass
         if isinstance(coalitions, list):
             coalitions = np.array(coalitions)
         if coalitions.dtype != bool:
