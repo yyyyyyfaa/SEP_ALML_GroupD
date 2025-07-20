@@ -1,5 +1,4 @@
-"""
-Test suite for GaussianImputer implementation.
+"""Test suite for GaussianImputer implementation.
 
 This module contains comprehensive tests for the GaussianImputer class,
 verifying its functionality for conditional mean imputation based on
@@ -11,26 +10,28 @@ The tests cover:
 - Edge cases (no missing values, degenerate covariance)
 - Integration with shapiq framework via __call__ method
 """
+from __future__ import annotations
+
 import numpy as np
 import pytest
-from shapiq.games.imputer.base import Imputer
+
 from shapiq_student.gaussian_imputer import GaussianImputer
 
+
 class DummyModel:
-    """
-    Simple test model that returns sum of features.
+    """Simple test model that returns sum of features.
+
     Used for testing imputer functionality without complex model dependencies.
     """
     def __call__(self, X):
-        """
-        Return sum of features for each sample.
+        """Return sum of features for each sample.
 
         Parameters
         ----------
         X : np.ndarray of shape (n_samples, n_features)
             Input features.
 
-        Returns
+        Returns:
         -------
         np.ndarray of shape (n_samples,)
             Sum of features for each sample.
@@ -39,13 +40,12 @@ class DummyModel:
         return np.sum(X, axis=1)
 
 def generate_simple_data():
-    """
-    Generate simple 2D test data with known statistics.
+    """Generate simple 2D test data with known statistics.
 
     Creates a small dataset with predictable mean and covariance
     for testing parameter estimation accuracy.
 
-    Returns
+    Returns:
     -------
     data : np.ndarray of shape (3, 2)
         Training data with known statistics.
@@ -63,8 +63,8 @@ def generate_simple_data():
     return data, mask_data, x
 
 def test_fit_sets_mean_and_covariance():
-    """
-    Test that fit() correctly estimates mean and covariance from data.
+    """Test that fit() correctly estimates mean and covariance from data.
+
     Verifies that the imputer learns the correct distributional parameters
     from complete training data.
     """
@@ -79,8 +79,8 @@ def test_fit_sets_mean_and_covariance():
     np.testing.assert_allclose(imp.CovMatrix, expected_cov)
 
 def test_transform_no_missing_leaves_data_unchanged():
-    """
-    Test that transform() doesn't modify data without missing values.
+    """Test that transform() doesn't modify data without missing values.
+
     Ensures that complete data passes through unchanged, preserving
     the original values exactly.
     """
@@ -91,8 +91,8 @@ def test_transform_no_missing_leaves_data_unchanged():
     np.testing.assert_array_equal(X_imp, X)
 
 def test_transform_single_missing_value():
-    """
-    Test conditional mean imputation for single missing feature.
+    """Test conditional mean imputation for single missing feature.
+
     Verifies that the imputed value matches the theoretical conditional
     expectation from multivariate Gaussian distribution.
     """
@@ -103,15 +103,16 @@ def test_transform_single_missing_value():
     mask = np.array([[True, False]])
     X_imp = imp.transform(X, mask=mask)
     # Conditional expectation: E[X0 | X1=10] = mu0 + Sigma01 / Sigma11 * (10 - mu1)
+    k = 10.0
     mu = imp.mean
     Sigma = imp.CovMatrix
     cond = mu[0] + Sigma[0,1]/Sigma[1,1]*(10.0 - mu[1])
     assert X_imp[0,0] == pytest.approx(cond)
-    assert X_imp[0,1] == 10.0
+    assert X_imp[0,1] == k
 
 def test_transform_degenerate_covariance_fallback():
-    """
-    Test fallback behavior when covariance matrix is singular.
+    """Test fallback behavior when covariance matrix is singular.
+
     When features are perfectly correlated (degenerate covariance),
     the imputer should fall back to unconditional mean.
     """
@@ -127,8 +128,8 @@ def test_transform_degenerate_covariance_fallback():
     np.testing.assert_allclose(X_imp[0], expected_mean)
 
 def test_call_invokes_model_with_imputed_values():
-    """
-    Test __call__ method integration with shapiq framework.
+    """Test __call__ method integration with shapiq framework.
+
     Verifies that coalitions are correctly interpreted, missing values
     are imputed, and the model is called with imputed data.
     """

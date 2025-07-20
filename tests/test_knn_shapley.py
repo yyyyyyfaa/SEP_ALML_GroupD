@@ -81,7 +81,7 @@ def test_equidistant_samples_symmetry():
 
     their shapley values should be same.
     """
-    # 3 points：[-1], [1] have same dists with point 0，third points is different
+    # 3 points: [-1], [1] have same dists with point 0, third points is different
     X_train = np.array([[-1.0], [1.0], [10.0]])
     y_train = np.array([0, 0, 1])
     model = KNeighborsClassifier(n_neighbors=2)
@@ -97,7 +97,7 @@ def test_equidistant_samples_symmetry():
 
 def test_invalid_input_type_raises_type_error():
     """Test that TypeError is raised when X contains invalid (non-numeric) input types."""
-    #  string in X，y is normal
+    #  string in X, y is normal
     X_train = np.array([[0.0, 1.0],
                         [1.0, 2.0],
                         ["a", "b"]], dtype=object)
@@ -120,17 +120,16 @@ def test_unweighted_init_sets_mode_and_attributes():
     model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X, y)
 
-    # 修复2: 不直接设置max_order，让父类处理
+    # 修复2: 不直接设置max_order, 让父类处理
     explainer = KNNExplainer(model=model, data=X, labels=y, model_name="test")
 
     assert explainer.dataset is X
     assert explainer.labels is y
     assert explainer.model_name == "test"
     # remove klammern
-    assert explainer.N == X.shape[0]
-    assert explainer.M == X.shape[1]
+    assert X.shape[0] == explainer.N
+    assert X.shape[1] == explainer.M
     assert explainer.mode == "normal"
-    # 修复2: 通过父类属性访问max_order
     assert explainer.max_order == 1  # 验证默认值正确设置
 
 def test_list_input_consistency():
@@ -140,7 +139,7 @@ def test_list_input_consistency():
     model = KNeighborsClassifier(n_neighbors=2)
     model.fit(X_train_list, y_train_list)
 
-    # 修复1: 将list转换为numpy数组
+
     x_test = np.array([[1.5]])  # 确保是2D数组
     pred = model.predict(x_test)[0]
     explainer_list = KNNShapley(model, X_train_list, y_train_list, pred)
