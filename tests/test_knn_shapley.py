@@ -27,7 +27,7 @@ def test_unweighted_knn_shapley_single_manual():
 
     # Use single-point API
     sv = explainer.knn_shapley_single(x_test, pred)
-    expected = np.array([-1/6, 1/3, 1/3])
+    expected = np.array([-1 / 6, 1 / 3, 1 / 3])
 
     assert isinstance(sv, np.ndarray)
     assert sv.shape == (len(X_train),)
@@ -54,8 +54,6 @@ def test_unweighted_knn_shapley_k1_nearest_only():
     assert pytest.approx(1.0, rel=1e-6) == shap[nearest_idx]
 
 
-
-
 def test_single_training_sample_shapley():
     """When there is only 1 training sample, no matter what k is,.
 
@@ -76,6 +74,7 @@ def test_single_training_sample_shapley():
     # contribution shoule be 1
     assert pytest.approx(1.0, rel=1e-6) == sv[0]
 
+
 def test_equidistant_samples_symmetry():
     """When 2 points have same dists and same labels,.
 
@@ -95,14 +94,13 @@ def test_equidistant_samples_symmetry():
     # the points with same dists should have same shapley values
     assert pytest.approx(sv[0], rel=1e-6) == sv[1]
 
+
 def test_invalid_input_type_raises_type_error():
     """Test that TypeError is raised when X contains invalid (non-numeric) input types."""
     #  string in X, y is normal
-    X_train = np.array([[0.0, 1.0],
-                        [1.0, 2.0],
-                        ["a", "b"]], dtype=object)
+    X_train = np.array([[0.0, 1.0], [1.0, 2.0], ["a", "b"]], dtype=object)
     y_train = np.array([0, 1, 1])
-    x_test  = np.array([0.5, 1.5])
+    x_test = np.array([0.5, 1.5])
     K = 2
 
     model = KNeighborsClassifier(n_neighbors=K)
@@ -113,9 +111,10 @@ def test_invalid_input_type_raises_type_error():
     with pytest.raises(TypeError):
         _ = explainer.knn_shapley(x_test)
 
+
 def test_unweighted_init_sets_mode_and_attributes():
     """Test that KNNExplainer initializes mode and attributes correctly for unweighted KNN."""
-    X = np.array([[0.], [1.], [2.]])
+    X = np.array([[0.0], [1.0], [2.0]])
     y = np.array([0, 1, 2])
     model = KNeighborsClassifier(n_neighbors=1)
     model.fit(X, y)
@@ -132,13 +131,13 @@ def test_unweighted_init_sets_mode_and_attributes():
     assert explainer.mode == "normal"
     assert explainer.max_order == 1  # 验证默认值正确设置
 
+
 def test_list_input_consistency():
     """Lists input vs ndarray."""
     X_train_list = [[0.0], [1.0], [2.0]]
     y_train_list = [0, 1, 1]
     model = KNeighborsClassifier(n_neighbors=2)
     model.fit(X_train_list, y_train_list)
-
 
     x_test = np.array([[1.5]])  # 确保是2D数组
     pred = model.predict(x_test)[0]
@@ -148,22 +147,3 @@ def test_list_input_consistency():
     shap_list = explainer_list.knn_shapley(x_test)
     shap_array = explainer_array.knn_shapley(x_test)
     np.testing.assert_allclose(shap_list, shap_array, atol=1e-6)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

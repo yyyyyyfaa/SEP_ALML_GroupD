@@ -23,6 +23,7 @@ def dummy_model(x: np.ndarray) -> np.ndarray:
     """
     return np.sum(x, axis=1)
 
+
 def simple_data():
     """Generates data for testing purposes.
 
@@ -63,18 +64,18 @@ class TestGaussianCopulaImputer:
 
     def test_ecdf_forward_backward(self):
         """Tests if transforming data works correct."""
-        data,_ = simple_data()
+        data, _ = simple_data()
         col = data[:, 0]
-        imp = GaussianCopulaImputer(model=dummy_model, data = data)
+        imp = GaussianCopulaImputer(model=dummy_model, data=data)
         v = imp.ecdf_transform(col)
         quantile = norm.cdf(v)
         back = imp.inverse_ecdf(col, quantile)
-        np.testing.assert_allclose(back, col,  rtol=1e-6, atol=1 - 1e-6)
+        np.testing.assert_allclose(back, col, rtol=1e-6, atol=1 - 1e-6)
 
     def test_transform_no_missing(self):
         """Tests if transform does not change data."""
         data, x = simple_data()
-        imputer = GaussianCopulaImputer(model=dummy_model, data= data)
+        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
         imputer.fit(x)
         # Data should remain the same
         x_imp = imputer.transform(x)
@@ -83,7 +84,7 @@ class TestGaussianCopulaImputer:
     def test_call_returns_prediction(self):
         """Tests if the __call__ method returns valid prediction."""
         data, x = simple_data()
-        imputer = GaussianCopulaImputer(model=dummy_model, data= data)
+        imputer = GaussianCopulaImputer(model=dummy_model, data=data)
         imputer.fit(x)
         coalitions = np.array([[True, False, True, True, False]])
         preds = imputer(coalitions)
@@ -100,7 +101,6 @@ class TestGaussianCopulaImputer:
         x_imp = imputer.transform(x_missing)
         assert not np.isnan(x_imp).any()
         assert x_imp.shape == x.shape
-
 
     def test_fit_with_mask_data_filters_rows(self):
         """Tests if rows with missing values are excluded while fitting."""

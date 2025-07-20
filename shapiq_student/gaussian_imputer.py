@@ -1,4 +1,5 @@
 """Gaussian  Imputer class."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -38,7 +39,7 @@ class GaussianImputer(Imputer):
         self.n_players = data.shape[1]
         self.verbose = False
 
-    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None)-> GaussianImputer:
+    def fit(self, x: np.ndarray, mask_data: np.ndarray | None = None) -> GaussianImputer:
         """Fit the Gaussian imputer by estimating distribution parameters.
 
         Estimates the mean vector and covariance matrix from the training data.
@@ -65,7 +66,7 @@ class GaussianImputer(Imputer):
         self.CovMatrix = np.cov(X_full, rowvar=False, bias=False)
         return self
 
-    def transform(self, X: np.ndarray, mask: np.ndarray| None = None) -> np.ndarray:
+    def transform(self, X: np.ndarray, mask: np.ndarray | None = None) -> np.ndarray:
         """Transform data by imputing missing values with conditional means.
 
         For each sample, missing features are filled with their conditional

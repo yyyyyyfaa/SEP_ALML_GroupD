@@ -29,6 +29,7 @@ def v_hat(Players: list, e_weights: dict, k_max: int) -> float:
             total += e_weights.get(frozenset(T), 0.0)
     return total
 
+
 def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set:
     """Find a coalition of the given length that maximizes the value function using a greedy algorithm.
 
@@ -58,6 +59,7 @@ def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set
         candidates.remove(best_elem)
     return Players
 
+
 def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set:
     """Find a coalition of the given length that minimizes the value function using a greedy algorithm.
 
@@ -84,6 +86,7 @@ def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set
         candidates.remove(best_elem)
     return Players
 
+
 def subset_finding(interaction_values: InteractionValues, max_size: int) -> InteractionValues:
     """Compute new interaction values based on greedy subset finding.
 
@@ -98,30 +101,29 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> Inte
     index = interaction_values.index
     n_players = interaction_values.n_players
 
-    #converting weights into dict from frozenset(indices)
+    # converting weights into dict from frozenset(indices)
     e_weights = {frozenset(coal): value for coal, value in zip(index, weights, strict=False)}
 
     N = list(range(n_players))
     selected_coalitions = set()
 
-    #finding coalitions for all lengths
+    # finding coalitions for all lengths
     for length in range(1, n_players + 1):
         s_max = greedy_extreme_max(length, N, e_weights, max_size)
         s_min = greedy_extreme_min(length, N, e_weights, max_size)
 
-        #back to String coalitions
+        # back to String coalitions
         str_max = tuple(sorted(s_max))
         str_min = tuple(sorted(s_min))
-
 
         selected_coalitions.add(str_max)
         selected_coalitions.add(str_min)
 
-    #empty coalition
+    # empty coalition
     if frozenset() in e_weights:
         selected_coalitions.add("")
 
-    #filter values
+    # filter values
     new_values = []
     epsilon = 1e-3
 
@@ -133,9 +135,10 @@ def subset_finding(interaction_values: InteractionValues, max_size: int) -> Inte
             new_values.append(0.0)
 
     return InteractionValues(
-        index = interaction_values.index,
-        values = new_values,
-        n_players = n_players,
-        max_order = max_size,
-        min_order = interaction_values.min_order,
-        baseline_value = interaction_values.baseline_value)
+        index=interaction_values.index,
+        values=new_values,
+        n_players=n_players,
+        max_order=max_size,
+        min_order=interaction_values.min_order,
+        baseline_value=interaction_values.baseline_value,
+    )

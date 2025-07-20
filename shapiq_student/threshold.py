@@ -9,10 +9,19 @@ import numpy as np
 
 if TYPE_CHECKING:
     from shapiq.utils import Model
+
+
 class Threshold:
     """A class for calculating threshold-based KNN Shapley values."""
 
-    def __init__(self, model: Model, data: np.ndarray, labels: np.ndarray, class_index: np.ndarray, threshold: float) -> None:
+    def __init__(
+        self,
+        model: Model,
+        data: np.ndarray,
+        labels: np.ndarray,
+        class_index: np.ndarray,
+        threshold: float,
+    ) -> None:
         """Initialize the Threshold class with model, data, labels, class index, and threshold.
 
         Args:
@@ -28,9 +37,7 @@ class Threshold:
         self.class_index = class_index
         self.threshold = threshold
 
-    def threshold_knn_shapley_single(
-            self, x: np.ndarray, y_test : int
-    ) -> np.ndarray:
+    def threshold_knn_shapley_single(self, x: np.ndarray, y_test: int) -> np.ndarray:
         """Calculates the Shaply Value for one test point.
 
         Args:
@@ -52,7 +59,6 @@ class Threshold:
 
         for i in range(N):
             x_i, y_i = X[i], y[i]
-
 
             # Remove training points i from the data
             x_minus_i = np.delete(X, i, axis=0)

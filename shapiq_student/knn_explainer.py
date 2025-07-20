@@ -23,15 +23,18 @@ if TYPE_CHECKING:
 
 class KNNExplainer(Explainer):
     """Class KNNExplainer."""
-    def __init__(self,
+
+    def __init__(
+        self,
         model: Model,
         data: np.ndarray,
         labels: np.ndarray,
-        class_index : int | None = None,
-        model_name : str | None = None,
+        class_index: int | None = None,
+        model_name: str | None = None,
         max_order: int = 1,
         index: ExplainerIndices = "SV",
-        random_state: int = 42) -> None:
+        random_state: int = 42,
+    ) -> None:
         """Initialize the KNNExplainer.
 
         Args:
@@ -44,7 +47,7 @@ class KNNExplainer(Explainer):
             index (str): The index type for explanation.
             random_state (int): Seed for random number generation.
         """
-        super().__init__(model, data, class_index, max_order=max_order, index = index)
+        super().__init__(model, data, class_index, max_order=max_order, index=index)
         self.dataset = data
         self.labels = labels
         self.model_name = model_name
@@ -59,7 +62,7 @@ class KNNExplainer(Explainer):
             self.threshold = Threshold(model, data, labels, class_index, model.radius)
         else:
             self.mode = "normal"
-            self.knn= KNNShapley(model, data, labels, class_index)
+            self.knn = KNNShapley(model, data, labels, class_index)
 
     def explain(self, x: np.ndarray, *args: Any, **kwargs: Any) -> InteractionValues:  # noqa: ANN401, ARG002
         """Explain the prediction for a given input sample using KNN-based Shapley values.
@@ -90,4 +93,3 @@ class KNNExplainer(Explainer):
         )
 
         return interaction_values
-

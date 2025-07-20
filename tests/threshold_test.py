@@ -34,7 +34,6 @@ def test_shapley_threshold(data_train, x_explain, knn_basic):
     assert np.any(result != 0)
 
 
-
 # Test no training points are in radius
 def test_shapley_no_neighbors(data_train, knn_basic):
     """Test Shapley value calculation when no training points are within the threshold radius.
@@ -50,6 +49,7 @@ def test_shapley_no_neighbors(data_train, knn_basic):
     result = explainer.threshold_knn_shapley(far_point)
     # All values should be zero since no neighbors are found
     assert np.all(result == 0.0)
+
 
 # Test one training point in radius
 def test_shapley_with_only_one_neighbor(data_train, knn_basic):
@@ -68,6 +68,7 @@ def test_shapley_with_only_one_neighbor(data_train, knn_basic):
     assert result.shape == (x_train.shape[0],)
     assert np.any(result != 0)
 
+
 # Test Shapley values for a multiclass
 def test_shapley_multiclass(data_train_multiclass, x_explain_multiclass, knn_basic_multiclass):
     """Test Shapley value calculation for the Threshold class with multiclass data.
@@ -83,6 +84,7 @@ def test_shapley_multiclass(data_train_multiclass, x_explain_multiclass, knn_bas
 
     assert result.shape == (x_train.shape[0],)
     assert np.any(result != 0)
+
 
 # Test the threshold Shapley result against calculated expected result
 def test_shapley_result_against_expected():
@@ -103,6 +105,7 @@ def test_shapley_result_against_expected():
     expected = np.array([-0.5, 0.666667, -0.5])
 
     np.testing.assert_allclose(result, expected, atol=1e-5)
+
 
 if __name__ == "__main__":
     unittest.main()

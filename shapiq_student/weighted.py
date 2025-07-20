@@ -27,7 +27,9 @@ class Weighted:
         self.method = method
         self.labels = labels
 
-    def prepare_data(self,  x_val: np.ndarray, y_val: any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def prepare_data(
+        self, x_val: np.ndarray, y_val: any
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Prepares the data by filtering out the input sample and sorting the remaining samples by distance.
 
         Args:
@@ -47,7 +49,7 @@ class Weighted:
         mask = ~((self.dataset == x_val).all(axis=1) & (self.labels == y_val))
         X = self.dataset[mask]
         Y = self.labels[mask]
-         # Calculating the distance
+        # Calculating the distance
         distance = np.linalg.norm(X - x_val, axis=1)
         x_val = np.array(x_val)
         if x_val.shape[0] != self.dataset.shape[1]:
@@ -59,12 +61,7 @@ class Weighted:
         return X[sorted_index], Y[sorted_index], distance[sorted_index]
 
     def compute_weights(
-        self,
-        sorted_distance: np.ndarray,
-        Y_sorted: np.ndarray,
-        y_val: int,
-        gamma: int,
-        K: int
+        self, sorted_distance: np.ndarray, Y_sorted: np.ndarray, y_val: int, gamma: int, K: int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Computes the weighted values and discretized weight intervals for the k-nearest neighbor Shapley value calculation.
 
@@ -79,7 +76,7 @@ class Weighted:
             tuple[np.ndarray, np.ndarray]: Tuple containing the weighted values (w_j) and the discretized
             weight intervals (w_k).
         """
-        b = 3 #Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
+        b = 3  # Seite 8: Baselines & Settings & Hyperparameters/Seite 6 Remark 3
         intervalls = 2**b  # Anzahl der Intervalle
         w_i = np.exp(-sorted_distance / gamma)  # RBF Kernel weight
         w_k = np.linspace(0, K, (intervalls) * K)
@@ -128,13 +125,25 @@ class Weighted:
             F_i[(m, 1, w_j[m - 1])] = 1
 
         for length in range(2, K):
-            for m in range (length, N + 1):
+            for m in range(length, N + 1):
                 for s in w_k:
                     w_m = w_j[m - 1]
-                    F_i[(m, length, s)] = sum(F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m))
+                    F_i[(m, length, s)] = sum(
+                        F_i.get((t, length - 1, s - w_m), 0) for t in range(1, m)
+                    )
         return F_i
 
-    def compute_r_im(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict) -> dict:
+    def compute_r_im(
+        self,
+        i: int,
+        N: int,
+        K: int,
+        Y_sorted: np.ndarray,
+        y_val: int,
+        w_j: np.ndarray,
+        helper_array: np.ndarray,
+        F_i: dict,
+    ) -> dict:
         """Computes the R_im values used in the weighted k-nearest neighbor Shapley value calculation.
 
         Args:
@@ -155,26 +164,37 @@ class Weighted:
 
         upper = max(i + 1, K + 1)
 
-        #Berechnung von R_im
+        # Berechnung von R_im
         for m in range(upper, N + 1):
-            R_im[i ,m] = 0
+            R_im[i, m] = 0
             for t in range(1, m - 1):
                 if Y_sorted[i - 1] == y_val:
-                    count_target_end = np.sum(w_j > - w_j[i - 1])
-                    count_target_start = np.sum(w_j > - w_j[m - 1])
+                    count_target_end = np.sum(w_j > -w_j[i - 1])
+                    count_target_start = np.sum(w_j > -w_j[m - 1])
 
-                    for s in range(- count_target_start, - count_target_end):
+                    for s in range(-count_target_start, -count_target_end):
                         R_im[i, m] += F_i.get((t, K - 1, helper_array[s]), 0)
 
                 else:
-                    count_target_end = np.sum(w_j > - w_j[m - 1])
-                    count_target_start = np.sum(w_j > - w_j[i - 1])
+                    count_target_end = np.sum(w_j > -w_j[m - 1])
+                    count_target_start = np.sum(w_j > -w_j[i - 1])
 
-                    for s in range(- count_target_start, - count_target_end):
+                    for s in range(-count_target_start, -count_target_end):
                         R_im[i, m] += F_i.get((t, K - 1, helper_array[s]), 0)
         return R_im
 
-    def compute_g_il(self, i: int, N: int, K: int, Y_sorted: np.ndarray, y_val: int, w_j: np.ndarray, helper_array: np.ndarray, F_i: dict, count_zero: int) -> dict:
+    def compute_g_il(
+        self,
+        i: int,
+        N: int,
+        K: int,
+        Y_sorted: np.ndarray,
+        y_val: int,
+        w_j: np.ndarray,
+        helper_array: np.ndarray,
+        F_i: dict,
+        count_zero: int,
+    ) -> dict:
         """Computes the G_il values used in the weighted k-nearest neighbor Shapley value calculation.
 
         Args:
@@ -202,13 +222,13 @@ class Weighted:
                     for m in range(N + 1):
                         if m != i:
                             if Y_sorted[i - 1] == y_val:
-                                count_target = np.sum(w_j > - w_j[i - 1])
-                                for s in range(- count_target, - count_zero):
+                                count_target = np.sum(w_j > -w_j[i - 1])
+                                for s in range(-count_target, -count_zero):
                                     G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
 
                             else:
-                                count_target = np.sum(w_j > - w_j[i - 1])
-                                for s in range(- count_zero, - count_target):
+                                count_target = np.sum(w_j > -w_j[i - 1])
+                                for s in range(-count_zero, -count_target):
                                     G_il[i, length] += F_i.get((m, length, helper_array[s]), 0)
         return G_il
 
@@ -249,7 +269,7 @@ class Weighted:
 
         count_zero = np.sum(w_j > 0)
 
-        for i in range(1, N+ 1):
+        for i in range(1, N + 1):
             F_i = self.compute_f_i(N, K, w_k, w_j, i)
             R_im = self.compute_r_im(i, N, K, Y, y_val, w_j, helper_array, F_i)
             G_il = self.compute_g_il(i, N, K, Y, y_val, w_j, helper_array, F_i, count_zero)
@@ -260,14 +280,13 @@ class Weighted:
             first_term = 0
 
             for length in range(K):
-
                 first_term += G_il.get(i, length) / comb(N - 1, length)
 
             first_term = (1 / N) * first_term
 
             second_term = 0
             for m in range(max(i + 1, K + 1), N + 1):
-               second_term += R_im.get(i, m) / (m * comb(m - 1, K))
+                second_term += R_im.get(i, m) / (m * comb(m - 1, K))
 
             phi[i - 1] = sign * (first_term + second_term)
 

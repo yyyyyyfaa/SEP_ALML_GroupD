@@ -10,6 +10,7 @@ The tests cover:
 - Edge cases (no missing values, degenerate covariance)
 - Integration with shapiq framework via __call__ method
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -23,6 +24,7 @@ class DummyModel:
 
     Used for testing imputer functionality without complex model dependencies.
     """
+
     def __call__(self, X):
         """Return sum of features for each sample.
 
@@ -38,6 +40,7 @@ class DummyModel:
         """
         # Sum of features for testing
         return np.sum(X, axis=1)
+
 
 def generate_simple_data():
     """Generate simple 2D test data with known statistics.
@@ -62,6 +65,7 @@ def generate_simple_data():
     x = np.array([[7.0, 8.0]])
     return data, mask_data, x
 
+
 def test_fit_sets_mean_and_covariance():
     """Test that fit() correctly estimates mean and covariance from data.
 
@@ -78,6 +82,7 @@ def test_fit_sets_mean_and_covariance():
     np.testing.assert_allclose(imp.mean, expected_mean)
     np.testing.assert_allclose(imp.CovMatrix, expected_cov)
 
+
 def test_transform_no_missing_leaves_data_unchanged():
     """Test that transform() doesn't modify data without missing values.
 
@@ -89,6 +94,7 @@ def test_transform_no_missing_leaves_data_unchanged():
     X = np.array([[10.0, 20.0]])
     X_imp = imp.transform(X.copy())
     np.testing.assert_array_equal(X_imp, X)
+
 
 def test_transform_single_missing_value():
     """Test conditional mean imputation for single missing feature.
@@ -106,9 +112,10 @@ def test_transform_single_missing_value():
     k = 10.0
     mu = imp.mean
     Sigma = imp.CovMatrix
-    cond = mu[0] + Sigma[0,1]/Sigma[1,1]*(10.0 - mu[1])
-    assert X_imp[0,0] == pytest.approx(cond)
-    assert X_imp[0,1] == k
+    cond = mu[0] + Sigma[0, 1] / Sigma[1, 1] * (10.0 - mu[1])
+    assert X_imp[0, 0] == pytest.approx(cond)
+    assert X_imp[0, 1] == k
+
 
 def test_transform_degenerate_covariance_fallback():
     """Test fallback behavior when covariance matrix is singular.
@@ -126,6 +133,7 @@ def test_transform_degenerate_covariance_fallback():
     X_imp = imp.transform(X, mask=mask)
     expected_mean = imp.mean
     np.testing.assert_allclose(X_imp[0], expected_mean)
+
 
 def test_call_invokes_model_with_imputed_values():
     """Test __call__ method integration with shapiq framework.
@@ -145,10 +153,6 @@ def test_call_invokes_model_with_imputed_values():
     expected = np.sum(transformed, axis=1)
     assert preds[0] == pytest.approx(expected[0])
 
+
 if __name__ == "__main__":
     pytest.main()
-
-
-
-
-

@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from shapiq.utils import Model
 
 
-
 class KNNShapley:
     """Class to compute KNN Shapley values for data points.
 
@@ -19,7 +18,9 @@ class KNNShapley:
 
     """
 
-    def __init__(self, model: Model, data: np.ndarray, labels: np.ndarray, class_index: np.ndarray) -> None:
+    def __init__(
+        self, model: Model, data: np.ndarray, labels: np.ndarray, class_index: np.ndarray
+    ) -> None:
         """Initialize the KNNShapley instance.
 
         Args:
@@ -33,8 +34,7 @@ class KNNShapley:
         self.labels = labels
         self.class_index = class_index
 
-
-    def knn_shapley_single(self, X_test: np.ndarray, y_test : int ) -> np.ndarray:
+    def knn_shapley_single(self, X_test: np.ndarray, y_test: int) -> np.ndarray:
         """Compute KNN Shapley values for a single test point.
 
         Args:
@@ -65,16 +65,12 @@ class KNNShapley:
             cur_idx = idx_sorted[i]
             nxt_idx = idx_sorted[i + 1]
             # diff of contribution between test point i and i+1
-            delta = (int(y_train[cur_idx] == y_test) -
-                int(y_train[nxt_idx]== y_test)) / K
+            delta = (int(y_train[cur_idx] == y_test) - int(y_train[nxt_idx] == y_test)) / K
             prob = min(K, i + 1) / (i + 1)
             s[cur_idx] = s[nxt_idx] + delta * prob
 
         shap_values[:] = s
         return shap_values
-
-
-
 
     def knn_shapley(self, X_test: np.ndarray) -> np.ndarray:
         """Compute the average KNN Shapley values for one or more test points.
@@ -92,4 +88,3 @@ class KNNShapley:
         for x in X:
             sv += self.knn_shapley_single(x, self.class_index)
         return sv / n
-

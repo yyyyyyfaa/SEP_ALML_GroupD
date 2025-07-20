@@ -12,6 +12,7 @@ from shapiq.games.imputer.base import Imputer
 if TYPE_CHECKING:
     from shapiq.utils import Model
 
+
 class GaussianCopulaImputer(Imputer):
     """Imputer which uses a Gaussian Copula to impute missing values.
 
@@ -46,7 +47,7 @@ class GaussianCopulaImputer(Imputer):
              np.ndarray: Transformed data to standard normal space.
         """
         x = np.asarray(x).flatten()
-        ranks = rankdata(x, method="average") # Ranking the values
+        ranks = rankdata(x, method="average")  # Ranking the values
         uniform = np.clip(ranks / len(x), 1e-6, 1 - 1e-6)
         return norm.ppf(uniform)
 
@@ -119,7 +120,6 @@ class GaussianCopulaImputer(Imputer):
 
             # If there are no miss_idx transfrom back
             if obs_idx.size == 0:
-
                 for j in miss_idx:
                     p = norm.cdf(self.mean[j])
                     X_imp[i, j] = self.inverse_ecdf(self.ecdf_data[j], p)
@@ -129,7 +129,6 @@ class GaussianCopulaImputer(Imputer):
             mu_M = self.mean[miss_idx]
             Sigma_OO = self.CovMatrix[np.ix_(obs_idx, obs_idx)]
             Sigma_MO = self.CovMatrix[np.ix_(miss_idx, obs_idx)]
-
 
             # Looks if Matrix Sigma_00 has full rank(invertibal)
             if np.linalg.matrix_rank(Sigma_OO) < Sigma_OO.shape[0]:
@@ -171,5 +170,3 @@ class GaussianCopulaImputer(Imputer):
             predictions[i] = self.model(x_cond)[0]
 
         return predictions
-
-
