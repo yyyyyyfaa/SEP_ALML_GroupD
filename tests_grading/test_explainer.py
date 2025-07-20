@@ -65,7 +65,8 @@ class TestExplainer:
         model = request.getfixturevalue(model_name)
         n_samples = x_train.shape[0]
         explainer = KNNExplainer(model=model, data=x_train, labels=y_train)
-        assert explainer.mode == expected_mode  # check if the KNNExplainer sets a mode correctly
+        assert explainer.mode == expected_mode
+        print()# check if the KNNExplainer sets a mode correctly
         explanation = explainer.explain(x=x_explain)
         assert explanation is not None, "Explanation should not be None."
         assert isinstance(explanation, InteractionValues)

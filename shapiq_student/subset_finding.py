@@ -15,19 +15,13 @@ from shapiq import InteractionValues
 def v_hat(Players: list, e_weights: dict, k_max: int) -> float:
     """Compute the value function for a set of players up to a maximum coalition size.
 
-    Parameters
-    ----------
-    Players : list
-        List of players in the coalition.
-    e_weights : dict
-        Dictionary mapping frozensets of players to their associated weights.
-    k_max : int
-        Maximum coalition size to consider.
+    Args:
+        Players(list): List of players in the coalition.
+        e_weights (dict): Dictionary mapping frozensets of players to their associated weights.
+        k_max (int): Maximum coalition size to consider.
 
     Returns:
-    -------
-    float
-        The computed value for the coalition.
+        float: The computed value for the coalition.
     """
     total = e_weights.get(frozenset(), 0.0)
     for r in range(1, k_max + 1):
@@ -38,21 +32,14 @@ def v_hat(Players: list, e_weights: dict, k_max: int) -> float:
 def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set:
     """Find a coalition of the given length that maximizes the value function using a greedy algorithm.
 
-    Parameters
-    ----------
-    length : int
-        Desired size of the coalition.
-    N : list
-        List of players.
-    e_weights : dict
-        Dictionary mapping frozensets of players to their associated weights.
-    k_max : int
-        Maximum coalition size to consider.
+   Args:
+        length (int): Desired size of the coalition.
+        N (list): List of players.
+        e_weights (dict): Dictionary mapping frozensets of players to their associated weights.
+        k_max (int): Maximum coalition size to consider.
 
     Returns:
-    -------
-    set
-        Set of players forming the coalition with the maximum value.
+        set: Set of players forming the coalition with the maximum value.
     """
     if length > len(N):
         msg = "Requested coalition length exceeds number of players"
@@ -74,21 +61,14 @@ def greedy_extreme_max(length: int, N: list, e_weights: dict, k_max: int) -> set
 def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set:
     """Find a coalition of the given length that minimizes the value function using a greedy algorithm.
 
-    Parameters
-    ----------
-    length : int
-        Desired size of the coalition.
-    N : list
-        List of players.
-    e_weights : dict
-        Dictionary mapping frozensets of players to their associated weights.
-    k_max : int
-        Maximum coalition size to consider.
+    Args:
+    length (int): Desired size of the coalition.
+    N (list): List of players.
+    e_weights (dict): Dictionary mapping frozensets of players to their associated weights.
+    k_max (int): Maximum coalition size to consider.
 
     Returns:
-    -------
-    set
-        Set of players forming the coalition with the minimum value.
+    set : Set of players forming the coalition with the minimum value.
     """
     Players = set()
     candidates = set(N)
@@ -104,26 +84,21 @@ def greedy_extreme_min(length: int, N: list, e_weights: dict, k_max: int) -> set
         candidates.remove(best_elem)
     return Players
 
-def subset_finding(interaction_values: InteractionValues, max_size: int) -> dict:
+def subset_finding(interaction_values: InteractionValues, max_size: int) -> InteractionValues:
     """Compute new interaction values based on greedy subset finding.
 
-    Parameters
-    ----------
-    interaction_values : InteractionValues
-        The original Interaction values object.
-    k_max : int
-        Maximum coalition size to consider.
+    Args:
+    interaction_values (InteractionValues): he original Interaction values object.
+    k_max (int): Maximum coalition size to consider.
 
     Returns:
-    -------
-    InteractionValues
-        A new InteractionValues object with filtered/support-sellected entries.
+        InteractionValues: A new InteractionValues object with filtered/support-selected entries.
     """
     weights = interaction_values.values
     index = interaction_values.index
     n_players = interaction_values.n_players
 
-    #converting weights into dict from frozenset(inices)
+    #converting weights into dict from frozenset(indices)
     e_weights = {frozenset(coal): value for coal, value in zip(index, weights, strict=False)}
 
     N = list(range(n_players))
