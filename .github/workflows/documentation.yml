@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install dependencies
         run: |
-          pip install sphinx sphinx_rtd_theme myst_parser nbsphinx furo ipykernel numpy
+          pip install sphinx sphinx_rtd_theme myst_parser nbsphinx furo ipykernel numpy shapiq
       - name: Sphinx build
         run: |
           cd docs
