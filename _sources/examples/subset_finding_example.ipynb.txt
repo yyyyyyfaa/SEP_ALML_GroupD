@@ -1,0 +1,234 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0f11e0c0",
+   "metadata": {},
+   "source": [
+    "# Subset Finding Algorithm - Example Notebook\n",
+    "\n",
+    "This Notebook shows the funtionality of the subset-finding algortihm."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "85da091b",
+   "metadata": {},
+   "source": [
+    "## Objective\n",
+    "\n",
+    "Given a feature attribution model (e.g., SHAP), we aim to identify relevant subsets of features\n",
+    "that contribute to the explanaation of a specific model output.\n",
+    "\n",
+    "This example uses synthetic data and a simple model structure to illustrate the concept"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "23771176",
+   "metadata": {},
+   "source": [
+    "Imports:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "c13e38b5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from __future__ import annotations\n",
+    "\n",
+    "import os\n",
+    "import sys\n",
+    "\n",
+    "notebook_dir = os.getcwd()\n",
+    "project_root = os.path.abspath(os.path.join(notebook_dir, \"..\"))\n",
+    "sys.path.insert(0, project_root)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "b46fc8f6",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "c:\\Users\\tobib\\SEP_ALML_GroupD\\.venv\\Lib\\site-packages\\tqdm\\auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html\n",
+      "  from .autonotebook import tqdm as notebook_tqdm\n"
+     ]
+    }
+   ],
+   "source": [
+    "from shapiq import ExactComputer\n",
+    "from shapiq.games.benchmark import SOUM\n",
+    "\n",
+    "from shapiq_student.subset_finding import subset_finding"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8224dbb1",
+   "metadata": {},
+   "source": [
+    "Initialize a game:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "71f08f63",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "game = SOUM(n = 8, n_basis_games = 50)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "8848369f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "computer = ExactComputer(n_players = game.n_players, game = game)\n",
+    "iv = computer(index = \"FSII\", order = 3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "72dce48b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Original interaction values: 4 coalitions\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"Original interaction values: {len(iv.index)} coalitions\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "13626852",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "iv_subset = subset_finding(interaction_values = iv, max_size = 3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "698192c8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Subset interaction values: FSII coalitions\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"Subset interaction values: {(iv_subset.index)} coalitions\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "fbd058f7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "InteractionValues(\n",
+      "    index=FSII, max_order=3, min_order=0, estimated=True, estimation_budget=None,\n",
+      "    n_players=8, baseline_value=-0.6778843098211,\n",
+      "    Top 10 interactions:\n",
+      "        (1,): -0.07080412786109225\n",
+      "        (2,): -0.07080412786109225\n",
+      "        (): -0.6778843098211\n",
+      "        (0,): -1.0245539945426618\n",
+      ")\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(iv_subset)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "a139b320",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Alle Werte nach der Selektion:\n",
+      "F -0.6778843098211\n",
+      "S -1.0245539945426618\n",
+      "I -0.07080412786109225\n",
+      "I -0.07080412786109225\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Alle Werte nach der Selektion:\")\n",
+    "for coal, val in zip(iv_subset.index, iv_subset.values, strict=False):\n",
+    "    print(coal, val)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ce75485d",
+   "metadata": {},
+   "source": [
+    "## Summary\n",
+    "\n",
+    "- The subset-finding algorithm enables focused analysis of feature groups.\n",
+    "- It provides interpretable insights based on Shapley values.\n",
+    "- This notebook demonstrates the process from data generation to result interpretation.\n",
+    "\n",
+    "It is intended for inclusion in Sphinx documentation to illustrate the algorithm's application in a minimal example.\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": ".venv",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

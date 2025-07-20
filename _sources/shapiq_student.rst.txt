@@ -1,0 +1,69 @@
+shapiq\_student package
+=======================
+
+Submodules
+----------
+
+shapiq\_student.gaussian\_copula\_imputer module
+------------------------------------------------
+
+.. automodule:: shapiq_student.gaussian_copula_imputer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.gaussian\_imputer module
+----------------------------------------
+
+.. automodule:: shapiq_student.gaussian_imputer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.knn\_explainer module
+-------------------------------------
+
+.. automodule:: shapiq_student.knn_explainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.knn\_shapley module
+-----------------------------------
+
+.. automodule:: shapiq_student.knn_shapley
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.subset\_finding module
+--------------------------------------
+
+.. automodule:: shapiq_student.subset_finding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.threshold module
+--------------------------------
+
+.. automodule:: shapiq_student.threshold
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+shapiq\_student.weighted module
+-------------------------------
+
+.. automodule:: shapiq_student.weighted
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: shapiq_student
+   :members:
+   :undoc-members:
+   :show-inheritance:
